@@ -10,6 +10,7 @@ import {
 import { format } from 'date-fns';
 import { memo } from 'react';
 import { Message } from './message';
+import { useUserRoles } from '@/features/server/hooks';
 
 type TMessagesGroupProps = {
   group: TJoinedMessage[];
@@ -20,7 +21,14 @@ const MessagesGroup = memo(({ group }: TMessagesGroupProps) => {
   const user = useUserById(firstMessage.userId);
   const date = new Date(firstMessage.createdAt);
   const isOwnUser = useIsOwnUser(firstMessage.userId);
+  const displayedRole = useUserRoles(firstMessage.userId).sort((a, b) => a.orderNr - b.orderNr).find((r) => r.isGrouping === true);
+  let roleColor = '#ffffff';
+  if(displayedRole){
+    roleColor = displayedRole.color;
+  }
+
   const isDeletedUser = user?.name === DELETED_USER_IDENTITY_AND_NAME;
+
 
   if (!user) return null;
 
@@ -35,7 +43,9 @@ const MessagesGroup = memo(({ group }: TMessagesGroupProps) => {
               isDeletedUser && 'line-through text-muted-foreground'
             )}
           >
+            <span style={{ color: roleColor }}>
             {getRenderedUsername(user)}
+            </span>
           </span>
           <RelativeTime date={date}>
             {(relativeTime) => (

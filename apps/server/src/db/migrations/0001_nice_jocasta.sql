@@ -1,1 +1,0 @@
-ALTER TABLE `users` ADD `locked_username` integer DEFAULT false NOT NULL;

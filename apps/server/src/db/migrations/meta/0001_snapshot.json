@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "34620336-408f-419e-96fd-a946c9fe62ce",
+  "id": "eb391fb3-62fc-49c2-a6e7-754fb38065e2",
   "prevId": "60b881f6-58b6-452f-bc97-2431cc2e4b06",
   "tables": {
     "activity_log": {
@@ -1643,6 +1643,21 @@
           "notNull": true,
           "autoincrement": false
         },
+        "is_grouping": {
+          "name": "is_grouping",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
+        "order_nr": {
+          "name": "order_nr",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "integer",
@@ -1659,6 +1674,13 @@
         }
       },
       "indexes": {
+        "roles_order_nr_unique": {
+          "name": "roles_order_nr_unique",
+          "columns": [
+            "order_nr"
+          ],
+          "isUnique": true
+        },
         "roles_is_default_idx": {
           "name": "roles_is_default_idx",
           "columns": [
