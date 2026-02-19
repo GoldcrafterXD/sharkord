@@ -16,13 +16,13 @@ import {
   CardTitle,
   Input,
   Label,
-  Tooltip
+  Tooltip,
+  Switch
 } from '@sharkord/ui';
 import { Info, Star, Trash2 } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { PermissionList } from './permissions-list';
-import { Switch } from '@/components/ui/switch';
 import { updateRole as updateRoleAction } from '@/features/server/roles/actions';
 
 type TUpdateRoleProps = {

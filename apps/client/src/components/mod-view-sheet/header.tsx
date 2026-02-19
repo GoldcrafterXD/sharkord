@@ -1,5 +1,6 @@
 import { UserAvatar } from '@/components/user-avatar';
 import { setModViewOpen } from '@/features/app/actions';
+import { Button } from '@sharkord/ui';
 import {
   openDialog,
   requestConfirmation,
@@ -16,6 +17,7 @@ import { RoleBadge } from '../role-badge';
 import { useModViewContext } from './context';
 import { useCan } from '@/features/server/hooks';
 import { useRoles } from '@/features/server/roles/hooks';
+import { getTRPCClient } from '@/lib/trpc';
 
 const Header = memo(() => {
   const ownUserId = useOwnUserId();
