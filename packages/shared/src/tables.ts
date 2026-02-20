@@ -136,3 +136,7 @@ export type TJoinedSettings = TSettings & {
 export type TJoinedInvite = TInvite & {
   creator: TJoinedPublicUser;
 };
+
+export type TJoinedChannel = TChannel & {
+  channelPermissions: TChannelRolePermission[];
+}

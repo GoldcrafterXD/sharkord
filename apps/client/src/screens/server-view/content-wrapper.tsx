@@ -1,5 +1,6 @@
 import { TextChannel } from '@/components/channel-view/text';
 import { VoiceChannel } from '@/components/channel-view/voice';
+import { PrivateChannel } from '@/components/channel-view/private';
 import { PluginSlotRenderer } from '@/components/plugin-slot-renderer';
 import {
   useSelectedChannelId,
@@ -26,6 +27,10 @@ const ContentWrapper = memo(() => {
     } else if (selectedChannelType === ChannelType.VOICE) {
       content = (
         <VoiceChannel key={selectedChannelId} channelId={selectedChannelId} />
+      );
+    } else if (selectedChannelType === ChannelType.PRIVATE) {
+      content = (
+        <PrivateChannel key={selectedChannelId} channelId={selectedChannelId} />
       );
     }
   } else {

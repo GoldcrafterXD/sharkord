@@ -1,7 +1,7 @@
 import {
   ChannelPermission,
   OWNER_ROLE_ID,
-  type TChannel,
+  type TJoinedChannel,
   type TChannelUserPermissionsMap,
   type TReadStateMap
 } from '@sharkord/shared';
@@ -125,7 +125,7 @@ const channelUserCan = async (
   return false;
 };
 
-const getChannelsForUser = async (userId: number): Promise<TChannel[]> => {
+const getChannelsForUser = async (userId: number): Promise<TJoinedChannel[]> => {
   const roleIds = await getUserRoleIds(userId);
 
   if (roleIds.includes(OWNER_ROLE_ID)) {

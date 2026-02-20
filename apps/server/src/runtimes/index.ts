@@ -1,5 +1,5 @@
 import { ChannelType } from '@sharkord/shared';
-import { eq } from 'drizzle-orm';
+import { eq, ne } from 'drizzle-orm';
 import { db } from '../db';
 import { channels } from '../db/schema';
 import { VoiceRuntime } from './voice';
@@ -10,7 +10,7 @@ const initVoiceRuntimes = async () => {
       id: channels.id
     })
     .from(channels)
-    .where(eq(channels.type, ChannelType.VOICE));
+    .where(ne(channels.type, ChannelType.TEXT));
 
   for (const channel of voiceChannels) {
     const runtime = new VoiceRuntime(channel.id);

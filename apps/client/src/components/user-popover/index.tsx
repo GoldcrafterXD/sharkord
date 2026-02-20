@@ -1,6 +1,7 @@
 import { setModViewOpen } from '@/features/app/actions';
 import { useUserRoles } from '@/features/server/hooks';
 import { useUserById } from '@/features/server/users/hooks';
+import { useChannels } from '@/features/server/channels/hooks'
 import { getFileUrl } from '@/helpers/get-file-url';
 import { getRenderedUsername } from '@/helpers/get-rendered-username';
 import {
@@ -9,14 +10,21 @@ import {
   UserStatus
 } from '@sharkord/shared';
 import { format } from 'date-fns';
-import { ShieldCheck, Trash, UserCog } from 'lucide-react';
-import { memo } from 'react';
+import { ShieldCheck, Trash, UserCog, MessageSquare } from 'lucide-react';
+import { memo, useCallback } from 'react';
 import { Protect } from '../protect';
 import { RoleBadge } from '../role-badge';
 import { IconButton } from '@sharkord/ui';
 import { Popover, PopoverContent, PopoverTrigger } from '@sharkord/ui';
 import { UserAvatar } from '../user-avatar';
 import { UserStatusBadge } from '../user-status';
+import {
+  ChannelType,
+  parseTrpcErrors,
+  type TTrpcErrors
+} from '@sharkord/shared';
+import { setSelectedChannelId } from '@/features/server/channels/actions';
+import { useOwnUserId, useUsernames } from '@/features/server/users/hooks';
 
 type TUserPopoverProps = {
   userId: number;
@@ -26,10 +34,33 @@ type TUserPopoverProps = {
 const UserPopover = memo(({ userId, children }: TUserPopoverProps) => {
   const user = useUserById(userId);
   const roles = useUserRoles(userId);
+  const channels = useChannels();
+  const ownUserId = useOwnUserId();
 
   if (!user) return <>{children}</>;
 
   const isDeleted = user.name === DELETED_USER_IDENTITY_AND_NAME;
+
+  const onChatClick = useCallback(async () => {
+
+    channels.filter((channel) => {
+      if (channel.type == ChannelType.PRIVATE) {
+        const targetHasPermission = channel.channelPermissions.some(
+          p => p.userId === user.id
+        );
+
+        const sourceHasPermission = channel.channelPermissions.some(
+          p => p.userId === ownUserId
+        );
+
+        if (targetHasPermission && sourceHasPermission) {
+          setSelectedChannelId(channel.id);
+        }
+      }
+
+    });
+
+  }, [setSelectedChannelId, channels]);
 
   return (
     <Popover>
@@ -119,6 +150,13 @@ const UserPopover = memo(({ userId, children }: TUserPopoverProps) => {
                 onClick={() => setModViewOpen(true, user.id)}
               />
             </Protect>
+            <IconButton
+              icon={MessageSquare}
+              variant="ghost"
+              size="sm"
+              title="Moderation View"
+              onClick={onChatClick}
+            />
           </div>
         </div>
       </PopoverContent>

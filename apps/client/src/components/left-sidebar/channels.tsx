@@ -38,7 +38,7 @@ import {
   ChannelPermission,
   ChannelType,
   Permission,
-  type TChannel,
+  type TJoinedChannel,
   getTrpcError
 } from '@sharkord/shared';
 import { Hash, Volume2 } from 'lucide-react';
@@ -49,7 +49,7 @@ import { ExternalStream } from './external-stream';
 import { VoiceUser } from './voice-user';
 
 type TVoiceProps = Omit<TItemWrapperProps, 'children'> & {
-  channel: TChannel;
+  channel: TJoinedChannel;
 };
 
 const Voice = memo(({ channel, ...props }: TVoiceProps) => {
@@ -89,7 +89,7 @@ const Voice = memo(({ channel, ...props }: TVoiceProps) => {
 });
 
 type TTextProps = Omit<TItemWrapperProps, 'children'> & {
-  channel: TChannel;
+  channel: TJoinedChannel;
 };
 
 const Text = memo(({ channel, ...props }: TTextProps) => {

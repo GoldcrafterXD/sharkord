@@ -2,7 +2,9 @@ import { ChannelPermission, type TFile, type TSettings, type TUser } from '.';
 
 export enum ChannelType {
   TEXT = 'TEXT',
-  VOICE = 'VOICE'
+  VOICE = 'VOICE',
+  PRIVATE = 'PRIVATE',
+  GROUP = 'GROUP'
 }
 
 export enum StreamKind {

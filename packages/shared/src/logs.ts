@@ -1,4 +1,4 @@
-import type { TChannel, TRole, TSettings } from './tables';
+import type { TJoinedChannel, TRole, TSettings } from './tables';
 import type { ChannelType } from './types';
 
 export enum ActivityLogType {
@@ -110,7 +110,7 @@ export type TActivityLogDetailsMap = {
   };
   [ActivityLogType.UPDATED_CHANNEL]: {
     channelId: number;
-    values: Partial<TChannel>;
+    values: Partial<TJoinedChannel>;
   };
   [ActivityLogType.UPDATED_CHANNEL_PERMISSIONS]: {
     channelId: number;

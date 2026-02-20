@@ -11,7 +11,7 @@ import {
   STORAGE_QUOTA,
   StorageOverflowAction,
   type TCategory,
-  type TChannel,
+  type TJoinedChannel,
   type TChannelRolePermission,
   type TChannelUserPermission,
   type TDiskMetrics,
@@ -234,7 +234,7 @@ export const useHasUpdates = () => {
 export const useAdminChannelGeneral = (channelId: number) => {
   const [loading, setLoading] = useState(true);
   const [errors, setErrors] = useState<TTrpcErrors>({});
-  const [channel, setChannel] = useState<TChannel | undefined>(undefined);
+  const [channel, setChannel] = useState<TJoinedChannel | undefined>(undefined);
 
   const fetchChannel = useCallback(async () => {
     setLoading(true);
@@ -265,7 +265,7 @@ export const useAdminChannelGeneral = (channelId: number) => {
   }, [channel, channelId]);
 
   const onChange = useCallback(
-    (field: keyof TChannel, value: string | null | boolean) => {
+    (field: keyof TJoinedChannel, value: string | null | boolean) => {
       if (!channel) return;
       setChannel((c) => (c ? { ...c, [field]: value } : c));
       setErrors((e) => ({ ...e, [field]: undefined }));

@@ -2,7 +2,7 @@ import type {
   ServerEvents,
   StreamKind,
   TCategory,
-  TChannel,
+  TJoinedChannel,
   TChannelUserPermissionsMap,
   TCommandsMapByPlugin,
   TExternalStream,
@@ -41,8 +41,8 @@ type Events = {
     deletedUserId: number; // the special Deleted User placeholder
   };
 
-  [ServerEvents.CHANNEL_CREATE]: TChannel;
-  [ServerEvents.CHANNEL_UPDATE]: TChannel;
+  [ServerEvents.CHANNEL_CREATE]: TJoinedChannel;
+  [ServerEvents.CHANNEL_UPDATE]: TJoinedChannel;
   [ServerEvents.CHANNEL_DELETE]: number;
   [ServerEvents.CHANNEL_PERMISSIONS_UPDATE]: TChannelUserPermissionsMap;
   [ServerEvents.CHANNEL_READ_STATES_UPDATE]: {
