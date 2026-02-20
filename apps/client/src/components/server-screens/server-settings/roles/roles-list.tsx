@@ -80,7 +80,7 @@ const RolesList = memo(
         console.log(error);
         toast.error('Could not Move role');
       }
-    }, [refetch, setSelectedRoleId, roles, selectedRoleId]);
+    }, [refetch, roles, selectedRoleId]);
 
     const onMoveRoleUp = useCallback(async () => {
       const trpc = getTRPCClient();
@@ -133,7 +133,7 @@ const RolesList = memo(
         console.log(error);
         toast.error('Could not Move role');
       }
-    }, [refetch, setSelectedRoleId, roles, selectedRoleId]);
+    }, [refetch, roles, selectedRoleId]);
 
 
     return (

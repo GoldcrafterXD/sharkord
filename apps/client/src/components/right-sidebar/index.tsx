@@ -18,6 +18,7 @@ type TUserProps = {
 type TUserGroup = {
   name: string;
   color?: string;
+  orderNr: number;
   users: TUserProps[];
 };
 
@@ -75,6 +76,7 @@ type TRightSidebarProps = {
 const RightSidebar = memo(
   ({ className, isOpen = true }: TRightSidebarProps) => {
     const users = useUsers();
+    console.log(JSON.stringify(users))
     const visibleUsers = useMemo(
       () =>
         users
@@ -93,7 +95,9 @@ const RightSidebar = memo(
         if (!role.isGrouping) continue; // Ignore non Grouping Roles
 
         const usersInGroup = visibleUsers.filter((user) => {
-          if (!user?.roleIds || !Array.isArray(user.roleIds)) return false;
+          if (!user?.roleIds || !Array.isArray(user.roleIds) || user.status === 'offline') {
+            return false;
+          }
 
           const userRoles = roles
             .filter((r) => user.roleIds.includes(r.id))
@@ -108,10 +112,24 @@ const RightSidebar = memo(
           groups.push({
             name: role.name,
             color: role.color,
+            orderNr: role.orderNr,
             users: usersInGroup.map((u) => ({ userId: u.id, name: u.name, banned: u.banned }))
           });
         }
       }
+
+      const offlineUsers = visibleUsers.filter((user) => {
+        return user.status === 'offline';
+      })
+
+      groups.sort((a, b) => a.orderNr - b.orderNr);
+
+      groups.push({
+        name: "Offline",
+        color: "#353535",
+        orderNr: 0,
+        users: offlineUsers.map((u) => ({ userId: u.id, name: u.name, banned: u.banned }))
+      });
 
       return groups;
     }, [visibleUsers, roles]);
