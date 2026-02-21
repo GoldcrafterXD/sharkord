@@ -30,7 +30,7 @@ import {
   ChannelPermission,
   ChannelType,
   Permission,
-  type TChannel,
+  type TJoinedChannel,
   getTrpcError
 } from '@sharkord/shared';
 import { Hash, Volume2 } from 'lucide-react';
@@ -43,7 +43,7 @@ import { AvatarFallback, Avatar } from '@sharkord/ui';
 import { getInitialsFromName } from '@/helpers/get-initials-from-name';
 
 type TVoiceProps = Omit<TItemWrapperProps, 'children'> & {
-  channel: TChannel;
+  channel: TJoinedChannel;
 };
 
 const Private = memo(({ channel, ...props }: TVoiceProps) => {
