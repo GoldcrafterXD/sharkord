@@ -45,7 +45,6 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
         useMessages(channelId);
 
     const [newMessage, setNewMessage] = useState('');
-    const allPluginCommands = useFlatPluginCommands();
     const typingUsers = useTypingUsersByChannelId(channelId);
     const channel = useChannelById(channelId);
     const { init } = useVoice();
@@ -68,13 +67,13 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
         return (
             channelCan(ChannelPermission.ACCESS_PRIVATE_CHANNEL)
         );
-    }, [can, channelCan]);
+    }, [channelCan]);
 
     const canUploadFiles = useMemo(() => {
         return (
             channelCan(ChannelPermission.ACCESS_PRIVATE_CHANNEL)
         );
-    }, [can, channelCan]);
+    }, [channelCan]);
 
     const pluginCommands = undefined;
 
