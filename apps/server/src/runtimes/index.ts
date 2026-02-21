@@ -1,5 +1,5 @@
 import { ChannelType } from '@sharkord/shared';
-import { eq, ne } from 'drizzle-orm';
+import { ne } from 'drizzle-orm';
 import { db } from '../db';
 import { channels } from '../db/schema';
 import { VoiceRuntime } from './voice';

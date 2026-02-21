@@ -6,7 +6,7 @@ import {
 import { Label, Switch } from '@sharkord/ui';
 import { memo, useCallback, useMemo } from 'react';
 
-const availableChannelPermissions = Object.values(ChannelPermission);
+const availableChannelPermissions = Object.values(ChannelPermission).filter((channelPermission) => channelPermission != ChannelPermission.ACCESS_PRIVATE_CHANNEL);
 
 type TChannelPermissionItemProps = {
   permission: ChannelPermission;

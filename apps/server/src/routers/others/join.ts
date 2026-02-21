@@ -2,7 +2,9 @@ import {
   ActivityLogType,
   ServerEvents,
   UserStatus,
-  type TPublicServerSettings
+  ChannelPermission,
+  type TPublicServerSettings,
+  type TJoinedChannel
 } from '@sharkord/shared';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
@@ -76,7 +78,7 @@ const joinServerRoute = rateLimitedProcedure(t.procedure, {
     ] = await Promise.all([
       db.select().from(categories),
       db.select().from(channels),
-      db.select().from(channelUserPermissions),
+      db.select().from(channelUserPermissions).where(eq(channelUserPermissions.permission, ChannelPermission.ACCESS_PRIVATE_CHANNEL)),
       getPublicUsers(true), // return identity to get status of already connected users
       getRoles(),
       getEmojis(),
@@ -84,8 +86,13 @@ const joinServerRoute = rateLimitedProcedure(t.procedure, {
       getChannelsReadStatesForUser(ctx.user.id)
     ]);
 
+    let allChannels = [];
     for (const channel of channelsForUser) {
-      channel.channelPermissions = allChannelPermissions.filter((channelPermission) => channelPermission.channelId === channel.id);
+      const joinedChannel: TJoinedChannel = {
+        ...channel,
+        channelPermissions: allChannelPermissions.filter((channelPermission) => channelPermission.channelId === channel.id)
+      }
+      allChannels.push(joinedChannel);
     }
 
     const processedPublicUsers = publicUsers.map((u) => ({
@@ -148,7 +155,7 @@ const joinServerRoute = rateLimitedProcedure(t.procedure, {
 
     return {
       categories: allCategories,
-      channels: channelsForUser,
+      channels: allChannels,
       users: processedPublicUsers,
       serverId: settings.serverId,
       serverName: settings.name,

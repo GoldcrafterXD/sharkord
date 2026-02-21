@@ -5,7 +5,7 @@ import {
     useChannelCan,
     useTypingUsersByChannelId
 } from '@/features/server/hooks';
-import { useChannelById, useCurrentVoiceChannelId } from '@/features/server/channels/hooks';
+import { useChannelById } from '@/features/server/channels/hooks';
 import { useMessages } from '@/features/server/messages/hooks';
 import { useFlatPluginCommands } from '@/features/server/plugins/hooks';
 import { playSound } from '@/features/server/sounds/actions';
@@ -49,7 +49,6 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
     const typingUsers = useTypingUsersByChannelId(channelId);
     const channel = useChannelById(channelId);
     const { init } = useVoice();
-    const currentVoiceChannelId = useCurrentVoiceChannelId();
 
     const { containerRef, onScroll } = useScrollController({
         messages,
@@ -67,24 +66,17 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
 
     const canSendMessages = useMemo(() => {
         return (
-            can(Permission.SEND_MESSAGES) &&
-            channelCan(ChannelPermission.SEND_MESSAGES)
+            channelCan(ChannelPermission.ACCESS_PRIVATE_CHANNEL)
         );
     }, [can, channelCan]);
 
     const canUploadFiles = useMemo(() => {
         return (
-            can(Permission.SEND_MESSAGES) &&
-            can(Permission.UPLOAD_FILES) &&
-            channelCan(ChannelPermission.SEND_MESSAGES)
+            channelCan(ChannelPermission.ACCESS_PRIVATE_CHANNEL)
         );
     }, [can, channelCan]);
 
-    const pluginCommands = useMemo(
-        () =>
-            can(Permission.EXECUTE_PLUGIN_COMMANDS) ? allPluginCommands : undefined,
-        [can, allPluginCommands]
-    );
+    const pluginCommands = undefined;
 
     const {
         files,
@@ -186,7 +178,7 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
         toast.error('Failed to initialize voice connection');
       }
     
-  }, [channelId, channel?.type, init, currentVoiceChannelId]);
+  }, [channelId, init]);
 
     if (!channelCan(ChannelPermission.VIEW_CHANNEL) || loading) {
         return <TextSkeleton />;
@@ -196,7 +188,7 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
         <>
             <div className="shrink-0 h-12 border-b border-border bg-background flex items-center justify-between px-4">
                 <div className="text-sm font-medium">
-                    {channel.name}
+                    {channel!.name!}
                 </div>
 
                 <div className="flex items-center gap-2">

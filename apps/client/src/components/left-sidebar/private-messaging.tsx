@@ -1,44 +1,21 @@
-import { TypingDots } from '@/components/typing-dots';
 import { setSelectedChannelId } from '@/features/server/channels/actions';
 import {
   useChannels,
-  useCurrentVoiceChannelId,
   useSelectedChannelId,
   useChannelById
 } from '@/features/server/channels/hooks';
 import {
-  useCan,
   useChannelCan,
-  useTypingUsersByChannelId,
-  useUnreadMessagesCount,
-  useVoiceUsersByChannelId
+  useUnreadMessagesCount
 } from '@/features/server/hooks';
-import { joinVoice } from '@/features/server/voice/actions';
-import {
-  useVoice,
-  useVoiceChannelExternalStreamsList
-} from '@/features/server/voice/hooks';
-import { getTRPCClient } from '@/lib/trpc';
 import { cn } from '@/lib/utils';
-import {
-  SortableContext,
-  useSortable,
-  verticalListSortingStrategy
-} from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import {
   ChannelPermission,
-  ChannelType,
-  Permission,
-  type TJoinedChannel,
-  getTrpcError
+  type TJoinedChannel
 } from '@sharkord/shared';
-import { Hash, Volume2 } from 'lucide-react';
-import { memo, useCallback, useMemo } from 'react';
-import { toast } from 'sonner';
-import { ChannelContextMenu } from '../context-menus/channel';
-import { ExternalStream } from './external-stream';
-import { VoiceUser } from './voice-user';
+import { memo, useCallback } from 'react';
 import { AvatarFallback, Avatar } from '@sharkord/ui';
 import { getInitialsFromName } from '@/helpers/get-initials-from-name';
 
@@ -47,8 +24,6 @@ type TVoiceProps = Omit<TItemWrapperProps, 'children'> & {
 };
 
 const Private = memo(({ channel, ...props }: TVoiceProps) => {
-  const users = useVoiceUsersByChannelId(channel.id);
-  const externalStreams = useVoiceChannelExternalStreamsList(channel.id);
   const unreadCount = useUnreadMessagesCount(channel.id);
 
   return (
@@ -118,10 +93,7 @@ type TChannelProps = {
 
 const PrivateChannel = memo(({ channelId, isSelected }: TChannelProps) => {
   const channel = useChannelById(channelId);
-  const currentVoiceChannelId = useCurrentVoiceChannelId();
   const channelCan = useChannelCan(channelId);
-  const can = useCan();
-  const { init } = useVoice();
 
   const {
     attributes,
@@ -134,13 +106,13 @@ const PrivateChannel = memo(({ channelId, isSelected }: TChannelProps) => {
 
   const onClick = useCallback(async () => {
     setSelectedChannelId(channelId);
-  }, [channelId, channel?.type, init, currentVoiceChannelId]);
+  }, [channelId]);
 
   if (!channel) {
     return null;
   }
 
-  if (!channelCan(ChannelPermission.VIEW_CHANNEL)) return null;
+  if (!channelCan(ChannelPermission.ACCESS_PRIVATE_CHANNEL)) return null;
 
   return (
     <div

@@ -139,5 +139,5 @@ export type TJoinedInvite = TInvite & {
 };
 
 export type TJoinedChannel = TChannel & {
-  channelPermissions: TChannelRolePermission[];
+  channelPermissions: TChannelUserPermission[];
 }

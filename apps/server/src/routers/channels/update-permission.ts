@@ -6,7 +6,7 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../../db';
-import { publishChannelPermissions } from '../../db/publishers';
+import { publishChannelPermissions, publishChannel } from '../../db/publishers';
 import { getAffectedUserIdsForChannel } from '../../db/queries/channels';
 import {
   channelRolePermissions,
@@ -97,6 +97,7 @@ const updatePermissionsRoute = protectedProcedure
         }))
       }
     });
+    publishChannel(input.channelId, 'update');
   });
 
 export { updatePermissionsRoute };

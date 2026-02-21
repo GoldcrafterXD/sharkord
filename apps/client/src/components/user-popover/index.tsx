@@ -7,7 +7,8 @@ import { getRenderedUsername } from '@/helpers/get-rendered-username';
 import {
   DELETED_USER_IDENTITY_AND_NAME,
   Permission,
-  UserStatus
+  UserStatus,
+  ChannelPermission
 } from '@sharkord/shared';
 import { format } from 'date-fns';
 import { ShieldCheck, Trash, UserCog, MessageSquare } from 'lucide-react';
@@ -18,13 +19,10 @@ import { IconButton } from '@sharkord/ui';
 import { Popover, PopoverContent, PopoverTrigger } from '@sharkord/ui';
 import { UserAvatar } from '../user-avatar';
 import { UserStatusBadge } from '../user-status';
-import {
-  ChannelType,
-  parseTrpcErrors,
-  type TTrpcErrors
-} from '@sharkord/shared';
+import { ChannelType } from '@sharkord/shared';
 import { setSelectedChannelId } from '@/features/server/channels/actions';
-import { useOwnUserId, useUsernames } from '@/features/server/users/hooks';
+import { useOwnUserId } from '@/features/server/users/hooks';
+import { getTRPCClient } from '@/lib/trpc';
 
 type TUserPopoverProps = {
   userId: number;
@@ -36,32 +34,73 @@ const UserPopover = memo(({ userId, children }: TUserPopoverProps) => {
   const roles = useUserRoles(userId);
   const channels = useChannels();
   const ownUserId = useOwnUserId();
+  const ownUser = useUserById(ownUserId!);
+  const isDeleted = user!.name === DELETED_USER_IDENTITY_AND_NAME;
+  const isSelf = user!.id === ownUserId;
 
-  if (!user) return <>{children}</>;
-
-  const isDeleted = user.name === DELETED_USER_IDENTITY_AND_NAME;
-
-  const onChatClick = useCallback(async () => {
-
-    channels.filter((channel) => {
-      if (channel.type == ChannelType.PRIVATE) {
+  const findPrivateChannel = useCallback((): number | undefined => {
+    const commonChannel = channels.find((channel) => {
+      if (channel.type === ChannelType.PRIVATE) {
         const targetHasPermission = channel.channelPermissions.some(
-          p => p.userId === user.id
+          (p) => p.userId === user!.id
         );
 
         const sourceHasPermission = channel.channelPermissions.some(
-          p => p.userId === ownUserId
+          (p) => p.userId === ownUserId
         );
 
-        if (targetHasPermission && sourceHasPermission) {
-          setSelectedChannelId(channel.id);
-        }
+        return targetHasPermission && sourceHasPermission;
       }
-
+      return false;
     });
 
-  }, [setSelectedChannelId, channels]);
+    return commonChannel?.id;
+  }, [channels, user, ownUserId]);
 
+
+  const onChatClick = useCallback(async () => {
+
+    let commonChannel = findPrivateChannel();
+    if(commonChannel){
+      setSelectedChannelId(commonChannel);
+      return;
+    }
+      const trpc = getTRPCClient();
+
+      const channelName = ownUser!.name + ", " + user!.name;
+
+      try {
+        commonChannel = await trpc.channels.add.mutate({ 
+          type: ChannelType.PRIVATE,
+          name: channelName,
+          categoryId: undefined
+        });
+
+        const permission = [];
+        permission.push(ChannelPermission.ACCESS_PRIVATE_CHANNEL);
+
+        console.log(JSON.stringify(permission));
+
+        await trpc.channels.updatePermissions.mutate({
+          channelId: commonChannel,
+          userId: user!.id,
+          permissions: permission
+        });
+
+        
+        await trpc.channels.updatePermissions.mutate({
+          channelId: commonChannel,
+          userId: ownUserId,
+          permissions: permission
+        });
+
+        close();
+      } catch (error) {
+        console.log(error);
+      }
+  }, [findPrivateChannel, ownUser, ownUserId, user]);
+
+  if (!user) return <>{children}</>;
   return (
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
@@ -154,8 +193,9 @@ const UserPopover = memo(({ userId, children }: TUserPopoverProps) => {
               icon={MessageSquare}
               variant="ghost"
               size="sm"
-              title="Moderation View"
+              title="Open Chat"
               onClick={onChatClick}
+              disabled={isSelf}
             />
           </div>
         </div>

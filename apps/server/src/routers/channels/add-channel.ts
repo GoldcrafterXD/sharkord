@@ -1,6 +1,6 @@
 import { ActivityLogType, ChannelType, Permission } from '@sharkord/shared';
 import { randomUUIDv7 } from 'bun';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../../db';
 import { publishChannel } from '../../db/publishers';
@@ -14,7 +14,7 @@ const addChannelRoute = protectedProcedure
     z.object({
       type: z.enum(ChannelType),
       name: z.string().min(1).max(27),
-      categoryId: z.number()
+      categoryId: z.number().optional()
     })
   )
   .mutation(async ({ input, ctx }) => {
@@ -24,8 +24,12 @@ const addChannelRoute = protectedProcedure
       const maxPositionChannel = await tx
         .select()
         .from(channels)
-        .orderBy(desc(channels.position))
-        .where(eq(channels.categoryId, input.categoryId))
+        .orderBy(desc(channels.position))  
+        .where( 
+          input.categoryId === undefined
+          ? isNull(channels.categoryId)
+          : eq(channels.categoryId, input.categoryId)
+        )
         .limit(1)
         .get();
 
@@ -42,7 +46,7 @@ const addChannelRoute = protectedProcedure
           type: input.type,
           fileAccessToken: randomUUIDv7(),
           fileAccessTokenUpdatedAt: now,
-          categoryId: input.categoryId,
+          categoryId: input.categoryId ?? null,
           createdAt: now
         })
         .returning()
@@ -51,7 +55,7 @@ const addChannelRoute = protectedProcedure
       return newChannel;
     });
 
-    if (channel.type === ChannelType.VOICE) {
+    if (channel.type === ChannelType.VOICE || channel.type === ChannelType.PRIVATE) {
       const runtime = new VoiceRuntime(channel.id);
 
       await runtime.init();

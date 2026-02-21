@@ -129,7 +129,25 @@ const getChannelsForUser = async (userId: number): Promise<TJoinedChannel[]> => 
   const roleIds = await getUserRoleIds(userId);
 
   if (roleIds.includes(OWNER_ROLE_ID)) {
-    return await db.select().from(channels);
+    let returnChannels = [];
+    const dbChannels = await db.select().from(channels);
+    for (const dbChannel of dbChannels) {
+      let channel: TJoinedChannel = {
+        ...dbChannel,
+        channelPermissions: []
+      }
+
+      if (dbChannel && dbChannel.id) {
+        const channelPermissions = await db
+          .select()
+          .from(channelUserPermissions)
+          .where(and(eq(channelUserPermissions.permission, ChannelPermission.ACCESS_PRIVATE_CHANNEL), eq(channelUserPermissions.channelId, dbChannel.id)));
+
+        channel.channelPermissions = channelPermissions;
+      }
+      returnChannels.push(channel);
+    }
+    return returnChannels;
   }
 
   const allChannels = await db.select().from(channels);
@@ -156,7 +174,24 @@ const getChannelsForUser = async (userId: number): Promise<TJoinedChannel[]> => 
     return rolePerm;
   });
 
-  return accessibleChannels;
+  let returnChannels = [];
+  for (const dbChannel of accessibleChannels) {
+    let channel: TJoinedChannel = {
+      ...dbChannel,
+      channelPermissions: []
+    }
+
+    if (dbChannel && dbChannel.id) {
+      const channelPermissions = await db
+        .select()
+        .from(channelUserPermissions)
+        .where(and(eq(channelUserPermissions.permission, ChannelPermission.ACCESS_PRIVATE_CHANNEL), eq(channelUserPermissions.channelId, dbChannel.id)));
+
+      channel.channelPermissions = channelPermissions;
+    }
+    returnChannels.push(channel);
+  }
+  return returnChannels;
 };
 
 const getAllChannelUserPermissions = async (
