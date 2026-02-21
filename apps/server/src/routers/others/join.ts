@@ -2,7 +2,9 @@ import {
   ActivityLogType,
   ServerEvents,
   UserStatus,
-  type TPublicServerSettings
+  ChannelPermission,
+  type TPublicServerSettings,
+  type TJoinedChannel
 } from '@sharkord/shared';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
@@ -15,7 +17,7 @@ import { getEmojis } from '../../db/queries/emojis';
 import { getRoles } from '../../db/queries/roles';
 import { getSettings } from '../../db/queries/server';
 import { getPublicUsers } from '../../db/queries/users';
-import { categories, channels, users } from '../../db/schema';
+import { categories, channels, channelUserPermissions, users } from '../../db/schema';
 import { logger } from '../../logger';
 import { pluginManager } from '../../plugins';
 import { eventBus } from '../../plugins/event-bus';
@@ -67,6 +69,7 @@ const joinServerRoute = rateLimitedProcedure(t.procedure, {
     const [
       allCategories,
       channelsForUser,
+      allChannelPermissions,
       publicUsers,
       roles,
       emojis,
@@ -75,12 +78,22 @@ const joinServerRoute = rateLimitedProcedure(t.procedure, {
     ] = await Promise.all([
       db.select().from(categories),
       db.select().from(channels),
+      db.select().from(channelUserPermissions).where(eq(channelUserPermissions.permission, ChannelPermission.ACCESS_PRIVATE_CHANNEL)),
       getPublicUsers(true), // return identity to get status of already connected users
       getRoles(),
       getEmojis(),
       getAllChannelUserPermissions(ctx.user.id),
       getChannelsReadStatesForUser(ctx.user.id)
     ]);
+
+    let allChannels = [];
+    for (const channel of channelsForUser) {
+      const joinedChannel: TJoinedChannel = {
+        ...channel,
+        channelPermissions: allChannelPermissions.filter((channelPermission) => channelPermission.channelId === channel.id)
+      }
+      allChannels.push(joinedChannel);
+    }
 
     const processedPublicUsers = publicUsers.map((u) => ({
       ...u,
@@ -142,7 +155,7 @@ const joinServerRoute = rateLimitedProcedure(t.procedure, {
 
     return {
       categories: allCategories,
-      channels: channelsForUser,
+      channels: allChannels,
       users: processedPublicUsers,
       serverId: settings.serverId,
       serverName: settings.name,

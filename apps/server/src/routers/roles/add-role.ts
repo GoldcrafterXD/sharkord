@@ -4,9 +4,21 @@ import { publishRole } from '../../db/publishers';
 import { roles } from '../../db/schema';
 import { enqueueActivityLog } from '../../queues/activity-log';
 import { protectedProcedure } from '../../utils/trpc';
+import { max } from 'drizzle-orm';
 
 const addRoleRoute = protectedProcedure.mutation(async ({ ctx }) => {
   await ctx.needsPermission(Permission.MANAGE_ROLES);
+
+  const maxRoleOrderNr = await db
+    .select({ orderNr: max(roles.orderNr) })
+    .from(roles)
+    .get();
+
+  let newOrderNr = 0;
+  if (maxRoleOrderNr && maxRoleOrderNr.orderNr) {
+    const maxOrderNumber = maxRoleOrderNr.orderNr ?? 0;
+    newOrderNr = maxOrderNumber + 1;
+  }
 
   const role = await db
     .insert(roles)
@@ -15,7 +27,8 @@ const addRoleRoute = protectedProcedure.mutation(async ({ ctx }) => {
       color: '#ffffff',
       isDefault: false,
       isPersistent: false,
-      createdAt: Date.now()
+      createdAt: Date.now(),
+      orderNr: newOrderNr
     })
     .returning()
     .get();

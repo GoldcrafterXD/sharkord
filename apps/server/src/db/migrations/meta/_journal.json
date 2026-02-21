@@ -12,8 +12,13 @@
     {
       "idx": 1,
       "version": "6",
+      "when": 1771445075964,
+      "tag": "0001_sticky_harpoon"
+    },
+    {
+      "idx": 2,
       "when": 1771530010367,
-      "tag": "0001_strange_starjammers",
+      "tag": "0002_strange_starjammers",
       "breakpoints": true
     }
   ]

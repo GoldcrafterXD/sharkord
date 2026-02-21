@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "eb391fb3-62fc-49c2-a6e7-754fb38065e2",
-  "prevId": "60b881f6-58b6-452f-bc97-2431cc2e4b06",
+  "id": "970a64a5-0ab3-4de1-8634-35ed73a2350f",
+  "prevId": "eb391fb3-62fc-49c2-a6e7-754fb38065e2",
   "tables": {
     "activity_log": {
       "name": "activity_log",
@@ -1403,6 +1403,13 @@
           "notNull": true,
           "autoincrement": false
         },
+        "parent_message_id": {
+          "name": "parent_message_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "editable": {
           "name": "editable",
           "type": "integer",
@@ -1460,6 +1467,13 @@
           "columns": [
             "channel_id",
             "created_at"
+          ],
+          "isUnique": false
+        },
+        "messages_parent_idx": {
+          "name": "messages_parent_idx",
+          "columns": [
+            "parent_message_id"
           ],
           "isUnique": false
         }

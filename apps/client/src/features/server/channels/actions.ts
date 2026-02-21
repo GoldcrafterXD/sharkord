@@ -1,5 +1,5 @@
 import { store } from '@/features/store';
-import type { TChannel, TChannelUserPermissionsMap } from '@sharkord/shared';
+import type { TJoinedChannel, TChannelUserPermissionsMap } from '@sharkord/shared';
 import { serverSliceActions } from '../slice';
 import {
   channelByIdSelector,
@@ -7,7 +7,7 @@ import {
   selectedChannelIdSelector
 } from './selectors';
 
-export const setChannels = (channels: TChannel[]) => {
+export const setChannels = (channels: TJoinedChannel[]) => {
   store.dispatch(serverSliceActions.setChannels(channels));
 };
 
@@ -18,13 +18,13 @@ export const setSelectedChannelId = (channelId: number | undefined) => {
 export const setCurrentVoiceChannelId = (channelId: number | undefined) =>
   store.dispatch(serverSliceActions.setCurrentVoiceChannelId(channelId));
 
-export const addChannel = (channel: TChannel) => {
+export const addChannel = (channel: TJoinedChannel) => {
   store.dispatch(serverSliceActions.addChannel(channel));
 };
 
 export const updateChannel = (
   channelId: number,
-  channel: Partial<TChannel>
+  channel: Partial<TJoinedChannel>
 ) => {
   store.dispatch(serverSliceActions.updateChannel({ channelId, channel }));
 };

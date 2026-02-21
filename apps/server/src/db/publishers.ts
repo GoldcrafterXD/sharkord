@@ -1,9 +1,10 @@
 import {
   ChannelPermission,
   ServerEvents,
-  type TChannelUserPermissionsMap
+  type TChannelUserPermissionsMap,
+  type TJoinedChannel
 } from '@sharkord/shared';
-import { count, eq } from 'drizzle-orm';
+import { count, eq, and } from 'drizzle-orm';
 import { db } from '.';
 import { pluginManager } from '../plugins';
 import { pubsub } from '../utils/pubsub';
@@ -16,7 +17,7 @@ import { getMessage } from './queries/messages';
 import { getRole } from './queries/roles';
 import { getPublicSettings } from './queries/server';
 import { getPublicUserById } from './queries/users';
-import { categories, channels, messages } from './schema';
+import { categories, channels, channelUserPermissions, messages } from './schema';
 
 const publishMessage = async (
   messageId: number | undefined,
@@ -88,7 +89,7 @@ const publishRole = async (
   roleId: number | undefined,
   type: 'create' | 'update' | 'delete'
 ) => {
-  if (!roleId) return;
+  if (roleId === undefined || roleId === null) return;
 
   if (type === 'delete') {
     pubsub.publish(ServerEvents.ROLE_DELETE, roleId);
@@ -132,13 +133,35 @@ const publishChannel = async (
     return;
   }
 
-  const channel = await db
+  const dbChannel = await db
     .select()
     .from(channels)
     .where(eq(channels.id, channelId))
     .get();
 
-  if (!channel) return;
+    const channel: TJoinedChannel = {
+      id: dbChannel!.id,
+      type: dbChannel!.type,
+      name: dbChannel!.name,
+      topic: dbChannel!.topic ?? null,
+      fileAccessToken: dbChannel!.fileAccessToken,
+      fileAccessTokenUpdatedAt: dbChannel!.fileAccessTokenUpdatedAt,
+      private: dbChannel!.private,
+      position: dbChannel!.position,
+      categoryId: dbChannel!.categoryId ?? null,
+      createdAt: dbChannel!.createdAt,
+      updatedAt: dbChannel!.updatedAt ?? null,
+      channelPermissions: []
+    }
+
+  if (dbChannel && dbChannel.id) {
+    const channelPermissions = await db
+      .select()
+      .from(channelUserPermissions)
+      .where(and(eq(channelUserPermissions.permission, ChannelPermission.ACCESS_PRIVATE_CHANNEL), eq(channelUserPermissions.channelId, dbChannel.id)));
+
+    channel.channelPermissions = channelPermissions;
+  }
 
   const targetEvent =
     type === 'create'

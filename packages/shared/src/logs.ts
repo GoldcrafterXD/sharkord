@@ -1,4 +1,4 @@
-import type { TChannel, TRole, TSettings } from './tables';
+import type { TJoinedChannel, TRole, TSettings } from './tables';
 import type { ChannelType } from './types';
 
 export enum ActivityLogType {
@@ -13,6 +13,7 @@ export enum ActivityLogType {
   USER_UNBANNED = 'USER_UNBANNED',
   USER_DELETED = 'USER_DELETED',
   USER_UPDATED_PASSWORD = 'USER_UPDATED_PASSWORD',
+  USERNAME_LOCK = 'USERNAME_LOCK',
   // -------------------- ROLES --------------------
   CREATED_ROLE = 'CREATED_ROLE',
   DELETED_ROLE = 'DELETED_ROLE',
@@ -74,6 +75,9 @@ export type TActivityLogDetailsMap = {
   };
   [ActivityLogType.USER_LEFT]: {};
   [ActivityLogType.USER_UPDATED_PASSWORD]: {};
+  [ActivityLogType.USERNAME_LOCK]: {
+    lockBy: number | undefined;
+  }
   // -------------------- ROLES --------------------
   [ActivityLogType.CREATED_ROLE]: {
     roleId: number;
@@ -106,7 +110,7 @@ export type TActivityLogDetailsMap = {
   };
   [ActivityLogType.UPDATED_CHANNEL]: {
     channelId: number;
-    values: Partial<TChannel>;
+    values: Partial<TJoinedChannel>;
   };
   [ActivityLogType.UPDATED_CHANNEL_PERMISSIONS]: {
     channelId: number;

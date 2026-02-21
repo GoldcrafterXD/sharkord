@@ -68,6 +68,8 @@ const roles = sqliteTable(
     color: text('color').notNull().default('#ffffff'),
     isPersistent: integer('is_persistent', { mode: 'boolean' }).notNull(),
     isDefault: integer('is_default', { mode: 'boolean' }).notNull(),
+    isGrouping: integer('is_grouping', { mode: 'boolean' }).default(false),
+    orderNr: integer('order_nr').notNull().unique(),
     createdAt: integer('created_at').notNull(),
     updatedAt: integer('updated_at')
   },
@@ -136,7 +138,8 @@ const users = sqliteTable(
       .notNull()
       .$defaultFn(() => Date.now()),
     createdAt: integer('created_at').notNull(),
-    updatedAt: integer('updated_at')
+    updatedAt: integer('updated_at'),
+    lockedUsername :integer('locked_username', { mode: 'boolean' }).notNull().default(false)
   },
   (t) => [
     uniqueIndex('users_identity_idx').on(t.identity),

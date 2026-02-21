@@ -1,6 +1,8 @@
 import { ResizableSidebar } from '@/components/resizable-sidebar';
 import { UserAvatar } from '@/components/user-avatar';
+import { useUserRoles } from '@/features/server/hooks';
 import { useUsers } from '@/features/server/users/hooks';
+import { useRoles } from '@/features/server/roles/hooks';
 import { LocalStorageKey } from '@/helpers/storage';
 import { cn } from '@/lib/utils';
 import { DELETED_USER_IDENTITY_AND_NAME } from '@sharkord/shared';
@@ -18,7 +20,19 @@ type TUserProps = {
   banned: boolean;
 };
 
+type TUserGroup = {
+  name: string;
+  color?: string;
+  orderNr: number;
+  users: TUserProps[];
+};
+
 const User = memo(({ userId, name, banned }: TUserProps) => {
+  const displayedRole = useUserRoles(userId).sort((a, b) => a.orderNr - b.orderNr).find((r) => r.isGrouping === true);
+  let roleColor = '#ffffff';
+  if(displayedRole){
+    roleColor = displayedRole.color;
+  }
   return (
     <UserPopover userId={userId}>
       <div className="flex items-center gap-3 rounded px-2 py-1.5 hover:bg-accent select-none min-w-0">
@@ -28,11 +42,34 @@ const User = memo(({ userId, name, banned }: TUserProps) => {
             'text-sm text-foreground truncate',
             banned && 'line-through text-muted-foreground'
           )}
-        >
-          {name}
+        ><span style={{color: roleColor }}>
+            {name}
+          </span>
         </span>
       </div>
     </UserPopover>
+  );
+});
+
+const UserGroup = memo(({ group }: { group: TUserGroup }) => {
+  return (
+    <>
+      <div className="flex h-12 items-center border-b border-border px-4">
+        <h3 className="text-sm font-semibold text-foreground">
+          {group.name} — {group.users.length}
+        </h3>
+      </div>
+      <div>
+        {group.users.map((user) => (
+          <User
+            key={user.userId}
+            userId={user.userId}
+            name={user.name}
+            banned={user.banned}
+          />
+        ))}
+      </div>
+    </>
   );
 });
 
@@ -44,16 +81,63 @@ type TRightSidebarProps = {
 const RightSidebar = memo(
   ({ className, isOpen = true }: TRightSidebarProps) => {
     const users = useUsers();
-
-    const usersToShow = useMemo(
+    console.log(JSON.stringify(users))
+    const visibleUsers = useMemo(
       () =>
         users
           .filter((user) => user.name !== DELETED_USER_IDENTITY_AND_NAME)
           .slice(0, MAX_USERS_TO_SHOW),
       [users]
     );
+    const roles = useRoles();
 
-    const hasHiddenUsers = users.length > MAX_USERS_TO_SHOW;
+    const userGroups: TUserGroup[] = useMemo(() => {
+      if (!roles || roles.length === 0 || !visibleUsers) return [];
+
+      const groups: TUserGroup[] = [];
+
+      for (const role of roles) {
+        if (!role.isGrouping) continue; // Ignore non Grouping Roles
+
+        const usersInGroup = visibleUsers.filter((user) => {
+          if (!user?.roleIds || !Array.isArray(user.roleIds) || user.status === 'offline') {
+            return false;
+          }
+
+          const userRoles = roles
+            .filter((r) => user.roleIds.includes(r.id))
+            .sort((a, b) => a.orderNr - b.orderNr); // Get all Roles User has
+
+          const sortingRole = userRoles.find((r) => r.isGrouping === true);
+
+          return sortingRole?.id === role.id;
+        });
+
+        if (usersInGroup.length > 0) {
+          groups.push({
+            name: role.name,
+            color: role.color,
+            orderNr: role.orderNr,
+            users: usersInGroup.map((u) => ({ userId: u.id, name: u.name, banned: u.banned }))
+          });
+        }
+      }
+
+      const offlineUsers = visibleUsers.filter((user) => {
+        return user.status === 'offline';
+      })
+
+      groups.sort((a, b) => a.orderNr - b.orderNr);
+
+      groups.push({
+        name: "Offline",
+        color: "#353535",
+        orderNr: 0,
+        users: offlineUsers.map((u) => ({ userId: u.id, name: u.name, banned: u.banned }))
+      });
+
+      return groups;
+    }, [visibleUsers, roles]);
 
     return (
       <ResizableSidebar
@@ -65,28 +149,15 @@ const RightSidebar = memo(
         isOpen={isOpen}
         className={cn('h-full', className)}
       >
-        <div className="flex h-12 items-center border-b border-border px-4">
-          <h3 className="text-sm font-semibold text-foreground">
-            Members — {users.length}
-          </h3>
-        </div>
-        <div className="flex-1 overflow-y-auto p-2">
-          <div className="space-y-1">
-            {usersToShow.map((user) => (
-              <User
-                key={user.id}
-                userId={user.id}
-                name={user.name}
-                banned={user.banned}
-              />
-            ))}
-            {hasHiddenUsers && (
-              <div className="text-sm text-muted-foreground px-2 py-1.5">
-                +{users.length - MAX_USERS_TO_SHOW} more...
-              </div>
-            )}
-          </div>
-        </div>
+        {isOpen && (
+          <>
+            <div className="flex-1 overflow-y-auto p-2">
+              {userGroups.map((g) => (
+                <UserGroup key={g.name} group={g} />
+              ))}
+            </div>
+          </>
+        )}
       </ResizableSidebar>
     );
   }

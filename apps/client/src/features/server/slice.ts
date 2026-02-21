@@ -3,7 +3,7 @@ import { getLocalStorageItemBool, LocalStorageKey } from '@/helpers/storage';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type {
   TCategory,
-  TChannel,
+  TJoinedChannel,
   TChannelUserPermissionsMap,
   TCommandInfo,
   TCommandsMapByPlugin,
@@ -33,7 +33,7 @@ export interface IServerState {
   disconnectInfo?: TDisconnectInfo;
   serverId?: string;
   categories: TCategory[];
-  channels: TChannel[];
+  channels: TJoinedChannel[];
   emojis: TJoinedEmoji[];
   ownUserId: number | undefined;
   selectedChannelId: number | undefined;
@@ -139,7 +139,7 @@ export const serverSlice = createSlice({
       action: PayloadAction<{
         serverId: string;
         categories: TCategory[];
-        channels: TChannel[];
+        channels: TJoinedChannel[];
         users: TJoinedPublicUser[];
         ownUserId: number;
         roles: TJoinedRole[];
@@ -529,12 +529,12 @@ export const serverSlice = createSlice({
 
     // CHANNELS ------------------------------------------------------------
 
-    setChannels: (state, action: PayloadAction<TChannel[]>) => {
+    setChannels: (state, action: PayloadAction<TJoinedChannel[]>) => {
       state.channels = action.payload;
     },
     updateChannel: (
       state,
-      action: PayloadAction<{ channelId: number; channel: Partial<TChannel> }>
+      action: PayloadAction<{ channelId: number; channel: Partial<TJoinedChannel> }>
     ) => {
       const index = state.channels.findIndex(
         (c) => c.id === action.payload.channelId
@@ -547,7 +547,7 @@ export const serverSlice = createSlice({
         ...action.payload.channel
       };
     },
-    addChannel: (state, action: PayloadAction<TChannel>) => {
+    addChannel: (state, action: PayloadAction<TJoinedChannel>) => {
       const exists = state.channels.find((c) => c.id === action.payload.id);
 
       if (exists) return;
