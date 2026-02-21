@@ -60,7 +60,6 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
     // keep this ref just as a safeguard
     const sendingRef = useRef(false);
     const [sending, setSending] = useState(false);
-    const can = useCan();
     const channelCan = useChannelCan(channelId);
 
     const canSendMessages = useMemo(() => {
