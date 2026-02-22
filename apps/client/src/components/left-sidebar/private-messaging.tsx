@@ -1,23 +1,17 @@
 import { setSelectedChannelId } from '@/features/server/channels/actions';
 import {
+  useChannelById,
   useChannels,
-  useSelectedChannelId,
-  useChannelById
+  useSelectedChannelId
 } from '@/features/server/channels/hooks';
-import {
-  useChannelCan,
-  useUnreadMessagesCount
-} from '@/features/server/hooks';
+import { useChannelCan, useUnreadMessagesCount } from '@/features/server/hooks';
+import { getInitialsFromName } from '@/helpers/get-initials-from-name';
 import { cn } from '@/lib/utils';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import {
-  ChannelPermission,
-  type TJoinedChannel
-} from '@sharkord/shared';
+import { ChannelPermission, type TJoinedChannel } from '@sharkord/shared';
+import { Avatar, AvatarFallback } from '@sharkord/ui';
 import { memo, useCallback } from 'react';
-import { AvatarFallback, Avatar } from '@sharkord/ui';
-import { getInitialsFromName } from '@/helpers/get-initials-from-name';
 
 type TVoiceProps = Omit<TItemWrapperProps, 'children'> & {
   channel: TJoinedChannel;
@@ -29,7 +23,7 @@ const Private = memo(({ channel, ...props }: TVoiceProps) => {
   return (
     <>
       <ItemWrapper {...props}>
-        <Avatar className={cn('h-8 w-8', "h-8 w-8")}>
+        <Avatar className={cn('h-8 w-8', 'h-8 w-8')}>
           <AvatarFallback className="bg-muted text-xs">
             {getInitialsFromName(channel.name)}
           </AvatarFallback>
@@ -123,16 +117,16 @@ const PrivateChannel = memo(({ channelId, isSelected }: TChannelProps) => {
         opacity: isDragging ? 0.5 : 1
       }}
     >
-        <div>
-          {channel.type === 'PRIVATE' && (
-            <Private
-              channel={channel}
-              isSelected={isSelected}
-              onClick={onClick}
-              dragHandleProps={{ ...attributes, ...listeners }}
-            />
-          )}
-        </div>
+      <div>
+        {channel.type === 'PRIVATE' && (
+          <Private
+            channel={channel}
+            isSelected={isSelected}
+            onClick={onClick}
+            dragHandleProps={{ ...attributes, ...listeners }}
+          />
+        )}
+      </div>
     </div>
   );
 });
@@ -143,13 +137,13 @@ const PrivateChannels = memo(() => {
 
   return (
     <div className="space-y-0.5">
-          {channels.map((channel) => (
-            <PrivateChannel
-              key={channel.id}
-              channelId={channel.id}
-              isSelected={selectedChannelId === channel.id}
-            />
-          ))}
+      {channels.map((channel) => (
+        <PrivateChannel
+          key={channel.id}
+          channelId={channel.id}
+          isSelected={selectedChannelId === channel.id}
+        />
+      ))}
     </div>
   );
 });

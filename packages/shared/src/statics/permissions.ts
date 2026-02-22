@@ -112,7 +112,8 @@ export const channelPermissionLabels: Record<ChannelPermission, string> = {
   [ChannelPermission.SPEAK]: 'Speak',
   [ChannelPermission.SHARE_SCREEN]: 'Share Screen',
   [ChannelPermission.WEBCAM]: 'Enable Webcam',
-  [ChannelPermission.ACCESS_PRIVATE_CHANNEL]: 'ACCESS_PRIVATE_CHANNEL (If you see this, shits broken)'
+  [ChannelPermission.ACCESS_PRIVATE_CHANNEL]:
+    'ACCESS_PRIVATE_CHANNEL (If you see this, shits broken)'
 };
 
 export const channelPermissionDescriptions: Record<ChannelPermission, string> =
@@ -123,5 +124,6 @@ export const channelPermissionDescriptions: Record<ChannelPermission, string> =
     [ChannelPermission.SPEAK]: 'Allows the user to speak in voice channels.',
     [ChannelPermission.SHARE_SCREEN]: 'Allows the user to share their screen.',
     [ChannelPermission.WEBCAM]: 'Allows the user to enable their webcam.',
-    [ChannelPermission.ACCESS_PRIVATE_CHANNEL]: 'ACCESS_PRIVATE_CHANNEL (If you see this, shits broken)'
+    [ChannelPermission.ACCESS_PRIVATE_CHANNEL]:
+      'ACCESS_PRIVATE_CHANNEL (If you see this, shits broken)'
   };

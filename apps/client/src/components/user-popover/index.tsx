@@ -1,10 +1,13 @@
 import { setModViewOpen } from '@/features/app/actions';
+import { setSelectedChannelId } from '@/features/server/channels/actions';
+import { useChannels } from '@/features/server/channels/hooks';
 import { useUserRoles } from '@/features/server/hooks';
-import { useUserById } from '@/features/server/users/hooks';
-import { useChannels } from '@/features/server/channels/hooks'
+import { useOwnUserId, useUserById } from '@/features/server/users/hooks';
 import { getFileUrl } from '@/helpers/get-file-url';
 import { getRenderedUsername } from '@/helpers/get-rendered-username';
+import { getTRPCClient } from '@/lib/trpc';
 import {
+  ChannelType,
   DELETED_USER_IDENTITY_AND_NAME,
   Permission,
   UserStatus
@@ -16,16 +19,12 @@ import {
   PopoverTrigger
 } from '@sharkord/ui';
 import { format } from 'date-fns';
-import { ShieldCheck, Trash, UserCog, MessageSquare } from 'lucide-react';
+import { MessageSquare, ShieldCheck, Trash, UserCog } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { Protect } from '../protect';
 import { RoleBadge } from '../role-badge';
 import { UserAvatar } from '../user-avatar';
 import { UserStatusBadge } from '../user-status';
-import { ChannelType } from '@sharkord/shared';
-import { setSelectedChannelId } from '@/features/server/channels/actions';
-import { useOwnUserId } from '@/features/server/users/hooks';
-import { getTRPCClient } from '@/lib/trpc';
 
 type TUserPopoverProps = {
   userId: number;
@@ -60,31 +59,29 @@ const UserPopover = memo(({ userId, children }: TUserPopoverProps) => {
     return commonChannel?.id;
   }, [channels, user, ownUserId]);
 
-
   const onChatClick = useCallback(async () => {
-
     let commonChannel = findPrivateChannel();
-    if(commonChannel){
+    if (commonChannel) {
       setSelectedChannelId(commonChannel);
       return;
     }
-      const trpc = getTRPCClient();
+    const trpc = getTRPCClient();
 
-      const channelName = ownUser!.name + ", " + user!.name;
+    const channelName = ownUser!.name + ', ' + user!.name;
 
-      try {
-        commonChannel = await trpc.channels.add.mutate({ 
-          type: ChannelType.PRIVATE,
-          name: channelName,
-          categoryId: undefined,
-          userIdA: ownUserId,
-          userIdB: user!.id
-        });
-        setSelectedChannelId(commonChannel);
-        close();
-      } catch (error) {
-        console.log(error);
-      }
+    try {
+      commonChannel = await trpc.channels.add.mutate({
+        type: ChannelType.PRIVATE,
+        name: channelName,
+        categoryId: undefined,
+        userIdA: ownUserId,
+        userIdB: user!.id
+      });
+      setSelectedChannelId(commonChannel);
+      close();
+    } catch (error) {
+      console.log(error);
+    }
   }, [findPrivateChannel, ownUser, ownUserId, user]);
 
   if (!user) return <>{children}</>;

@@ -37,11 +37,14 @@ const RolesList = memo(
           toast.error('No role selected');
           return;
         }
-        const sortedRoles = roles.sort((a, b) => b.orderNr - a.orderNr).reverse();
+        const sortedRoles = roles
+          .sort((a, b) => b.orderNr - a.orderNr)
+          .reverse();
         const changedRole = roles.find((role) => role.id === selectedRoleId);
-        const nextRole = sortedRoles.find((role) => role.orderNr > changedRole!.orderNr);
+        const nextRole = sortedRoles.find(
+          (role) => role.orderNr > changedRole!.orderNr
+        );
         const oldIndex = changedRole?.orderNr;
-
 
         if (!changedRole || !nextRole) {
           toast.error('Cannot Move Role Down');
@@ -75,7 +78,6 @@ const RolesList = memo(
         });
         toast.success('Role Moved Down');
         refetch();
-
       } catch (error) {
         console.log(error);
         toast.error('Could not Move role');
@@ -92,9 +94,10 @@ const RolesList = memo(
         }
         const sortedRoles = roles.sort((a, b) => b.orderNr - a.orderNr);
         const changedRole = roles.find((role) => role.id === selectedRoleId);
-        const lastRole = sortedRoles.find((role) => role.orderNr < changedRole!.orderNr);
+        const lastRole = sortedRoles.find(
+          (role) => role.orderNr < changedRole!.orderNr
+        );
         const oldIndex = changedRole?.orderNr;
-
 
         if (!changedRole || !lastRole) {
           toast.error('Cannot Move Role Up');
@@ -135,7 +138,6 @@ const RolesList = memo(
       }
     }, [refetch, roles, selectedRoleId]);
 
-
     return (
       <Card className="w-64 flex-shrink-0">
         <CardHeader>
@@ -155,22 +157,27 @@ const RolesList = memo(
           </div>
         </CardHeader>
         <CardContent className="space-y-2 p-2">
-          {roles.sort(function (a, b) { return a.orderNr - b.orderNr }).map((role) => (
-            <button
-              key={role.id}
-              onClick={() => setSelectedRoleId(role.id)}
-              className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent ${selectedRoleId === role.id ? 'bg-accent' : ''
+          {roles
+            .sort(function (a, b) {
+              return a.orderNr - b.orderNr;
+            })
+            .map((role) => (
+              <button
+                key={role.id}
+                onClick={() => setSelectedRoleId(role.id)}
+                className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors hover:bg-accent ${
+                  selectedRoleId === role.id ? 'bg-accent' : ''
                 }`}
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: role.color }}
-                />
-                <span>{role.name}</span>
-              </div>
-            </button>
-          ))}
+              >
+                <div className="flex items-center gap-2">
+                  <div
+                    className="h-3 w-3 rounded-full"
+                    style={{ backgroundColor: role.color }}
+                  />
+                  <span>{role.name}</span>
+                </div>
+              </button>
+            ))}
         </CardContent>
       </Card>
     );

@@ -1,4 +1,5 @@
 import { requestConfirmation } from '@/features/dialogs/actions';
+import { updateRole as updateRoleAction } from '@/features/server/roles/actions';
 import { useForm } from '@/hooks/use-form';
 import { getTRPCClient } from '@/lib/trpc';
 import {
@@ -16,14 +17,13 @@ import {
   CardTitle,
   Input,
   Label,
-  Tooltip,
-  Switch
+  Switch,
+  Tooltip
 } from '@sharkord/ui';
 import { Info, Star, Trash2 } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { PermissionList } from './permissions-list';
-import { updateRole as updateRoleAction } from '@/features/server/roles/actions';
 
 type TUpdateRoleProps = {
   selectedRole: TJoinedRole;
@@ -108,9 +108,12 @@ const UpdateRole = memo(
       }
     }, [selectedRole.id, refetch]);
 
-    const onCheckedChange = useCallback((checked: boolean) => {
-      onChange('isGrouping', checked);
-    }, [onChange]);
+    const onCheckedChange = useCallback(
+      (checked: boolean) => {
+        onChange('isGrouping', checked);
+      },
+      [onChange]
+    );
 
     return (
       <Card className="flex-1">

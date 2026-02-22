@@ -140,4 +140,4 @@ export type TJoinedInvite = TInvite & {
 
 export type TJoinedChannel = TChannel & {
   channelPermissions: TChannelUserPermission[];
-}
+};

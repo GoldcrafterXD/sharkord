@@ -1,8 +1,8 @@
 import {
   ChannelPermission,
   OWNER_ROLE_ID,
-  type TJoinedChannel,
   type TChannelUserPermissionsMap,
+  type TJoinedChannel,
   type TReadStateMap
 } from '@sharkord/shared';
 import { and, eq, inArray, sql } from 'drizzle-orm';
@@ -125,7 +125,9 @@ const channelUserCan = async (
   return false;
 };
 
-const getChannelsForUser = async (userId: number): Promise<TJoinedChannel[]> => {
+const getChannelsForUser = async (
+  userId: number
+): Promise<TJoinedChannel[]> => {
   const roleIds = await getUserRoleIds(userId);
 
   if (roleIds.includes(OWNER_ROLE_ID)) {
@@ -135,13 +137,21 @@ const getChannelsForUser = async (userId: number): Promise<TJoinedChannel[]> => 
       let channel: TJoinedChannel = {
         ...dbChannel,
         channelPermissions: []
-      }
+      };
 
       if (dbChannel && dbChannel.id) {
         const channelPermissions = await db
           .select()
           .from(channelUserPermissions)
-          .where(and(eq(channelUserPermissions.permission, ChannelPermission.ACCESS_PRIVATE_CHANNEL), eq(channelUserPermissions.channelId, dbChannel.id)));
+          .where(
+            and(
+              eq(
+                channelUserPermissions.permission,
+                ChannelPermission.ACCESS_PRIVATE_CHANNEL
+              ),
+              eq(channelUserPermissions.channelId, dbChannel.id)
+            )
+          );
 
         channel.channelPermissions = channelPermissions;
       }
@@ -179,13 +189,21 @@ const getChannelsForUser = async (userId: number): Promise<TJoinedChannel[]> => 
     let channel: TJoinedChannel = {
       ...dbChannel,
       channelPermissions: []
-    }
+    };
 
     if (dbChannel && dbChannel.id) {
       const channelPermissions = await db
         .select()
         .from(channelUserPermissions)
-        .where(and(eq(channelUserPermissions.permission, ChannelPermission.ACCESS_PRIVATE_CHANNEL), eq(channelUserPermissions.channelId, dbChannel.id)));
+        .where(
+          and(
+            eq(
+              channelUserPermissions.permission,
+              ChannelPermission.ACCESS_PRIVATE_CHANNEL
+            ),
+            eq(channelUserPermissions.channelId, dbChannel.id)
+          )
+        );
 
       channel.channelPermissions = channelPermissions;
     }

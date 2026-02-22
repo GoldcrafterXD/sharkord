@@ -1,5 +1,8 @@
 import { store } from '@/features/store';
-import type { TJoinedChannel, TChannelUserPermissionsMap } from '@sharkord/shared';
+import type {
+  TChannelUserPermissionsMap,
+  TJoinedChannel
+} from '@sharkord/shared';
 import { serverSliceActions } from '../slice';
 import {
   channelByIdSelector,
