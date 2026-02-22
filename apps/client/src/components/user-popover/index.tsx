@@ -9,13 +9,17 @@ import {
   Permission,
   UserStatus
 } from '@sharkord/shared';
+import {
+  IconButton,
+  Popover,
+  PopoverContent,
+  PopoverTrigger
+} from '@sharkord/ui';
 import { format } from 'date-fns';
 import { ShieldCheck, Trash, UserCog, MessageSquare } from 'lucide-react';
 import { memo, useCallback } from 'react';
 import { Protect } from '../protect';
 import { RoleBadge } from '../role-badge';
-import { IconButton } from '@sharkord/ui';
-import { Popover, PopoverContent, PopoverTrigger } from '@sharkord/ui';
 import { UserAvatar } from '../user-avatar';
 import { UserStatusBadge } from '../user-status';
 import { ChannelType } from '@sharkord/shared';
