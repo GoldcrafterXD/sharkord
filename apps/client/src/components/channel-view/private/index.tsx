@@ -1,20 +1,14 @@
 import { PluginSlotRenderer } from '@/components/plugin-slot-renderer';
 import { TiptapInput } from '@/components/tiptap-input';
-import {
-    useCan,
-    useChannelCan,
-    useTypingUsersByChannelId
-} from '@/features/server/hooks';
+import { useChannelCan, useTypingUsersByChannelId } from '@/features/server/hooks';
 import { useChannelById } from '@/features/server/channels/hooks';
 import { useMessages } from '@/features/server/messages/hooks';
-import { useFlatPluginCommands } from '@/features/server/plugins/hooks';
 import { playSound } from '@/features/server/sounds/actions';
 import { SoundType } from '@/features/server/types';
 import { useUploadFiles } from '@/hooks/use-upload-files';
 import { getTRPCClient } from '@/lib/trpc';
 import {
     ChannelPermission,
-    Permission,
     PluginSlot,
     TYPING_MS,
     getTrpcError,
@@ -60,17 +54,17 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
     // keep this ref just as a safeguard
     const sendingRef = useRef(false);
     const [sending, setSending] = useState(false);
-    const channelCan = useChannelCan(channelId);
+    const channelCan = useChannelCan(channelId, true);    
 
     const canSendMessages = useMemo(() => {
         return (
-            channelCan(ChannelPermission.ACCESS_PRIVATE_CHANNEL)
+            channelCan(ChannelPermission.SEND_MESSAGES)
         );
     }, [channelCan]);
 
     const canUploadFiles = useMemo(() => {
         return (
-            channelCan(ChannelPermission.ACCESS_PRIVATE_CHANNEL)
+            channelCan(ChannelPermission.SEND_MESSAGES)
         );
     }, [channelCan]);
 
@@ -159,24 +153,24 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
 
     const onCall = useCallback(async () => {
 
-      const response = await joinVoice(channelId);
+        const response = await joinVoice(channelId);
 
-      if (!response) {
-        // joining voice failed
-        setSelectedChannelId(undefined);
-        toast.error('Failed to join voice channel');
+        if (!response) {
+            // joining voice failed
+            setSelectedChannelId(undefined);
+            toast.error('Failed to join voice channel');
 
-        return;
-      }
+            return;
+        }
 
-      try {
-        await init(response, channelId);
-      } catch {
-        setSelectedChannelId(undefined);
-        toast.error('Failed to initialize voice connection');
-      }
-    
-  }, [channelId, init]);
+        try {
+            await init(response, channelId);
+        } catch {
+            setSelectedChannelId(undefined);
+            toast.error('Failed to initialize voice connection');
+        }
+
+    }, [channelId, init]);
 
     if (!channelCan(ChannelPermission.VIEW_CHANNEL) || loading) {
         return <TextSkeleton />;
@@ -190,10 +184,10 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button 
+                    <button
                         className="text-xs text-muted-foreground hover:text-foreground"
                         onClick={onCall}
-                        >
+                    >
                         <Phone className="h-4 w-4" />
                     </button>
                 </div>

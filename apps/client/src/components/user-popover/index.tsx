@@ -7,8 +7,7 @@ import { getRenderedUsername } from '@/helpers/get-rendered-username';
 import {
   DELETED_USER_IDENTITY_AND_NAME,
   Permission,
-  UserStatus,
-  ChannelPermission
+  UserStatus
 } from '@sharkord/shared';
 import { format } from 'date-fns';
 import { ShieldCheck, Trash, UserCog, MessageSquare } from 'lucide-react';
@@ -73,27 +72,10 @@ const UserPopover = memo(({ userId, children }: TUserPopoverProps) => {
         commonChannel = await trpc.channels.add.mutate({ 
           type: ChannelType.PRIVATE,
           name: channelName,
-          categoryId: undefined
+          categoryId: undefined,
+          userIdA: ownUserId,
+          userIdB: user!.id
         });
-
-        const permission = [];
-        permission.push(ChannelPermission.ACCESS_PRIVATE_CHANNEL);
-
-        console.log(JSON.stringify(permission));
-
-        await trpc.channels.updatePermissions.mutate({
-          channelId: commonChannel,
-          userId: user!.id,
-          permissions: permission
-        });
-
-        
-        await trpc.channels.updatePermissions.mutate({
-          channelId: commonChannel,
-          userId: ownUserId,
-          permissions: permission
-        });
-
         close();
       } catch (error) {
         console.log(error);
