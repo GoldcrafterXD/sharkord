@@ -82,9 +82,7 @@ const UserControl = memo(() => {
           )}
           onClick={toggleSound}
           title={
-            ownVoiceState.soundMuted
-              ? 'Undeafen (Ctrl+D)'
-              : 'Deafen (Ctrl+D)'
+            ownVoiceState.soundMuted ? 'Undeafen (Ctrl+D)' : 'Deafen (Ctrl+D)'
           }
         >
           {ownVoiceState.soundMuted ? (

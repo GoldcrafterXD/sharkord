@@ -1,12 +1,11 @@
-import { useEffect } from 'react';
 import { useVoice } from '@/features/server/voice/hooks';
+import { useEffect } from 'react';
 
 const Hotkeys = () => {
   const { toggleMic, toggleSound } = useVoice();
 
   useEffect(() => {
     const handleEvent = (e: KeyboardEvent) => {
-
       // only when Ctrl is pressed
       if (!e.ctrlKey) return;
 

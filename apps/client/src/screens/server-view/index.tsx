@@ -1,3 +1,4 @@
+import Hotkeys from '@/components/hotkeys';
 import { LeftSidebar } from '@/components/left-sidebar';
 import { ModViewSheet } from '@/components/mod-view-sheet';
 import { Protect } from '@/components/protect';
@@ -6,7 +7,6 @@ import { ThreadSidebar } from '@/components/thread-sidebar';
 import { TopBar } from '@/components/top-bar';
 import { VoiceChatSidebar } from '@/components/voice-chat-sidebar';
 import { VoiceProvider } from '@/components/voice-provider';
-import Hotkeys from '@/components/hotkeys';
 import { useThreadSidebar } from '@/features/app/hooks';
 import { getLocalStorageItemBool, LocalStorageKey } from '@/helpers/storage';
 import { useSwipeGestures } from '@/hooks/use-swipe-gestures';
@@ -71,8 +71,8 @@ const ServerView = memo(() => {
 
   return (
     <VoiceProvider>
-        <Hotkeys />
-        <div
+      <Hotkeys />
+      <div
         className="flex h-dvh flex-col bg-background text-foreground dark"
         {...swipeHandlers}
       >
