@@ -59,8 +59,8 @@ const UserControl = memo(() => {
           onClick={toggleMic}
           title={
             ownVoiceState.micMuted
-              ? 'Unmute microphone (Ctrl+Shift+M)'
-              : 'Mute microphone (Ctrl+Shift+M)'
+              ? 'Unmute microphone (Ctrl+M)'
+              : 'Mute microphone (Ctrl+M)'
           }
           disabled={!channelCan(ChannelPermission.SPEAK)}
         >
@@ -82,9 +82,7 @@ const UserControl = memo(() => {
           )}
           onClick={toggleSound}
           title={
-            ownVoiceState.soundMuted
-              ? 'Undeafen (Ctrl+Shift+D)'
-              : 'Deafen (Ctrl+Shift+D)'
+            ownVoiceState.soundMuted ? 'Undeafen (Ctrl+D)' : 'Deafen (Ctrl+D)'
           }
         >
           {ownVoiceState.soundMuted ? (

@@ -1,3 +1,4 @@
+import Hotkeys from '@/components/hotkeys';
 import { LeftSidebar } from '@/components/left-sidebar';
 import { ModViewSheet } from '@/components/mod-view-sheet';
 import { Protect } from '@/components/protect';
@@ -70,6 +71,7 @@ const ServerView = memo(() => {
 
   return (
     <VoiceProvider>
+      <Hotkeys />
       <div
         className="flex h-dvh flex-col bg-background text-foreground dark"
         {...swipeHandlers}
