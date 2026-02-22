@@ -80,6 +80,7 @@ const UserPopover = memo(({ userId, children }: TUserPopoverProps) => {
           userIdA: ownUserId,
           userIdB: user!.id
         });
+        setSelectedChannelId(commonChannel);
         close();
       } catch (error) {
         console.log(error);

@@ -88,11 +88,12 @@ export const useChannelCan = (
     (permission: ChannelPermission) => {
       if ((isOwner && !ignoreOwner) || !channel || !channel?.private) return true;
 
-      // if VIEW is false, no other permission matters
-      if (ownUserRoles.permissions[ChannelPermission.VIEW_CHANNEL] === false)
-        return false;
+      const permissions = ownUserRoles?.permissions ?? {};
 
-      return ownUserRoles.permissions[permission] === true;
+      // if VIEW is false, no other permission matters
+      if (permissions[ChannelPermission.VIEW_CHANNEL] === false) return false;
+
+      return permissions[permission] === true;
     },
     [ownUserRoles, isOwner, channel, ignoreOwner]
   );

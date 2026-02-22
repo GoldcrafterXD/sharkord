@@ -140,6 +140,8 @@ describe('users router', () => {
         color: '#00ff00',
         isPersistent: false,
         isDefault: false,
+        isGrouping: false,
+        orderNr: 999,
         createdAt: Date.now()
       })
       .returning();
