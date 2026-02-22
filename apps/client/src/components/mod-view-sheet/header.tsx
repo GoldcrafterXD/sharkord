@@ -1,23 +1,40 @@
 import { UserAvatar } from '@/components/user-avatar';
 import { setModViewOpen } from '@/features/app/actions';
-import { Button } from '@sharkord/ui';
 import {
   openDialog,
   requestConfirmation,
   requestTextInput
 } from '@/features/dialogs/actions';
-import { useUserRoles } from '@/features/server/hooks';
-import { useOwnUserId, useUserStatus, useIsOwnUser, useUserById } from '@/features/server/users/hooks';
-import { DELETED_USER_IDENTITY_AND_NAME, UserStatus, Permission, isEmptyMessage, getTrpcError } from '@sharkord/shared';
-import { Gavel, Plus, Trash, UserMinus, LockKeyhole, LockKeyholeOpen } from 'lucide-react';
-import { memo, useCallback, useState, useEffect, useMemo } from 'react';
+import { useCan, useUserRoles } from '@/features/server/hooks';
+import { useRoles } from '@/features/server/roles/hooks';
+import {
+  useIsOwnUser,
+  useOwnUserId,
+  useUserById,
+  useUserStatus
+} from '@/features/server/users/hooks';
+import { getTRPCClient } from '@/lib/trpc';
+import {
+  DELETED_USER_IDENTITY_AND_NAME,
+  Permission,
+  UserStatus,
+  getTrpcError,
+  isEmptyMessage
+} from '@sharkord/shared';
+import { Button } from '@sharkord/ui';
+import {
+  Gavel,
+  LockKeyhole,
+  LockKeyholeOpen,
+  Plus,
+  Trash,
+  UserMinus
+} from 'lucide-react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { Dialog } from '../dialogs/dialogs';
 import { RoleBadge } from '../role-badge';
 import { useModViewContext } from './context';
-import { useCan } from '@/features/server/hooks';
-import { useRoles } from '@/features/server/roles/hooks';
-import { getTRPCClient } from '@/lib/trpc';
 
 const Header = memo(() => {
   const ownUserId = useOwnUserId();
@@ -36,14 +53,21 @@ const Header = memo(() => {
   }, [user.name]);
 
   const canSetUsername = useMemo(
-    () => can(Permission.MANAGE_USERS) || (isFromOwnUser && !user.lockedUsername),
+    () =>
+      can(Permission.MANAGE_USERS) || (isFromOwnUser && !user.lockedUsername),
     [can, isFromOwnUser, user.lockedUsername]
   );
 
   const changedUser = useUserById(user.id);
   const allRoles = useRoles();
-  const roles = changedUser!.roleIds.map(roleId => allRoles.find(role => role.id === roleId));
-  const canLockUsername = roles.some(role => role?.permissions.includes(Permission.MANAGE_USERS)) ? true : false;
+  const roles = changedUser!.roleIds.map((roleId) =>
+    allRoles.find((role) => role.id === roleId)
+  );
+  const canLockUsername = roles.some((role) =>
+    role?.permissions.includes(Permission.MANAGE_USERS)
+  )
+    ? true
+    : false;
 
   const onChangedUsername = useCallback(
     async (userId: number, newName: string) => {
@@ -297,16 +321,20 @@ const Header = memo(() => {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => (user.lockedUsername ? onUnlockUsername() : onLockUsername())}
+          onClick={() =>
+            user.lockedUsername ? onUnlockUsername() : onLockUsername()
+          }
           disabled={canLockUsername}
         >
           {user.lockedUsername ? (
             <>
-              <LockKeyhole className="h-4 w-4" />Unlock Username
+              <LockKeyhole className="h-4 w-4" />
+              Unlock Username
             </>
           ) : (
             <>
-              <LockKeyholeOpen className="h-4 w-4" />Lock Username
+              <LockKeyholeOpen className="h-4 w-4" />
+              Lock Username
             </>
           )}
         </Button>

@@ -78,7 +78,7 @@ export const useCan = () => {
 
 export const useChannelCan = (
   channelId: number | undefined,
-  ignoreOwner?: boolean 
+  ignoreOwner?: boolean
 ) => {
   const ownUserRoles = useChannelPermissionsById(channelId || -1);
   const isOwner = useIsOwnUserOwner();
@@ -86,7 +86,8 @@ export const useChannelCan = (
 
   const can = useCallback(
     (permission: ChannelPermission) => {
-      if ((isOwner && !ignoreOwner) || !channel || !channel?.private) return true;
+      if ((isOwner && !ignoreOwner) || !channel || !channel?.private)
+        return true;
 
       const permissions = ownUserRoles?.permissions ?? {};
 

@@ -1,6 +1,6 @@
+import { PrivateChannel } from '@/components/channel-view/private';
 import { TextChannel } from '@/components/channel-view/text';
 import { VoiceChannel } from '@/components/channel-view/voice';
-import { PrivateChannel } from '@/components/channel-view/private';
 import { PluginSlotRenderer } from '@/components/plugin-slot-renderer';
 import {
   useSelectedChannelId,

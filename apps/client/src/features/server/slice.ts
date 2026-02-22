@@ -3,12 +3,12 @@ import { getLocalStorageItemBool, LocalStorageKey } from '@/helpers/storage';
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 import type {
   TCategory,
-  TJoinedChannel,
   TChannelUserPermissionsMap,
   TCommandInfo,
   TCommandsMapByPlugin,
   TExternalStream,
   TExternalStreamsMap,
+  TJoinedChannel,
   TJoinedEmoji,
   TJoinedMessage,
   TJoinedPublicUser,
@@ -534,7 +534,10 @@ export const serverSlice = createSlice({
     },
     updateChannel: (
       state,
-      action: PayloadAction<{ channelId: number; channel: Partial<TJoinedChannel> }>
+      action: PayloadAction<{
+        channelId: number;
+        channel: Partial<TJoinedChannel>;
+      }>
     ) => {
       const index = state.channels.findIndex(
         (c) => c.id === action.payload.channelId

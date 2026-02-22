@@ -1,10 +1,10 @@
 import { ActivityLogType, Permission } from '@sharkord/shared';
+import { max } from 'drizzle-orm';
 import { db } from '../../db';
 import { publishRole } from '../../db/publishers';
 import { roles } from '../../db/schema';
 import { enqueueActivityLog } from '../../queues/activity-log';
 import { protectedProcedure } from '../../utils/trpc';
-import { max } from 'drizzle-orm';
 
 const addRoleRoute = protectedProcedure.mutation(async ({ ctx }) => {
   await ctx.needsPermission(Permission.MANAGE_ROLES);

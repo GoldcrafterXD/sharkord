@@ -77,7 +77,7 @@ export type TActivityLogDetailsMap = {
   [ActivityLogType.USER_UPDATED_PASSWORD]: {};
   [ActivityLogType.USERNAME_LOCK]: {
     lockBy: number | undefined;
-  }
+  };
   // -------------------- ROLES --------------------
   [ActivityLogType.CREATED_ROLE]: {
     roleId: number;

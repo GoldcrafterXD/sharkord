@@ -6,7 +6,7 @@ import {
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../../db';
-import { publishChannelPermissions, publishChannel } from '../../db/publishers';
+import { publishChannel, publishChannelPermissions } from '../../db/publishers';
 import { getAffectedUserIdsForChannel } from '../../db/queries/channels';
 import {
   channelRolePermissions,

@@ -1,5 +1,9 @@
-import { Permission, ChannelPermission, type TJoinedChannel } from '@sharkord/shared';
-import { eq, and } from 'drizzle-orm';
+import {
+  ChannelPermission,
+  Permission,
+  type TJoinedChannel
+} from '@sharkord/shared';
+import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { db } from '../../db';
 import { channels, channelUserPermissions } from '../../db/schema';
@@ -39,13 +43,21 @@ const getChannelRoute = protectedProcedure
       createdAt: dbChannel!.createdAt,
       updatedAt: dbChannel!.updatedAt ?? null,
       channelPermissions: []
-    }
+    };
 
     if (dbChannel && dbChannel.id) {
       const channelPermissions = await db
         .select()
         .from(channelUserPermissions)
-        .where(and(eq(channelUserPermissions.permission, ChannelPermission.ACCESS_PRIVATE_CHANNEL), eq(channelUserPermissions.channelId, dbChannel!.id)));
+        .where(
+          and(
+            eq(
+              channelUserPermissions.permission,
+              ChannelPermission.ACCESS_PRIVATE_CHANNEL
+            ),
+            eq(channelUserPermissions.channelId, dbChannel!.id)
+          )
+        );
 
       channel.channelPermissions = channelPermissions;
     }

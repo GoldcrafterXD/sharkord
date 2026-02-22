@@ -1,8 +1,8 @@
 import { ResizableSidebar } from '@/components/resizable-sidebar';
 import { UserAvatar } from '@/components/user-avatar';
 import { useUserRoles } from '@/features/server/hooks';
-import { useUsers } from '@/features/server/users/hooks';
 import { useRoles } from '@/features/server/roles/hooks';
+import { useUsers } from '@/features/server/users/hooks';
 import { LocalStorageKey } from '@/helpers/storage';
 import { cn } from '@/lib/utils';
 import { DELETED_USER_IDENTITY_AND_NAME } from '@sharkord/shared';
@@ -28,9 +28,11 @@ type TUserGroup = {
 };
 
 const User = memo(({ userId, name, banned }: TUserProps) => {
-  const displayedRole = useUserRoles(userId).sort((a, b) => a.orderNr - b.orderNr).find((r) => r.isGrouping === true);
+  const displayedRole = useUserRoles(userId)
+    .sort((a, b) => a.orderNr - b.orderNr)
+    .find((r) => r.isGrouping === true);
   let roleColor = '#ffffff';
-  if(displayedRole){
+  if (displayedRole) {
     roleColor = displayedRole.color;
   }
   return (
@@ -42,9 +44,8 @@ const User = memo(({ userId, name, banned }: TUserProps) => {
             'text-sm text-foreground truncate',
             banned && 'line-through text-muted-foreground'
           )}
-        ><span style={{color: roleColor }}>
-            {name}
-          </span>
+        >
+          <span style={{ color: roleColor }}>{name}</span>
         </span>
       </div>
     </UserPopover>
@@ -99,7 +100,11 @@ const RightSidebar = memo(
         if (!role.isGrouping) continue; // Ignore non Grouping Roles
 
         const usersInGroup = visibleUsers.filter((user) => {
-          if (!user?.roleIds || !Array.isArray(user.roleIds) || user.status === 'offline') {
+          if (
+            !user?.roleIds ||
+            !Array.isArray(user.roleIds) ||
+            user.status === 'offline'
+          ) {
             return false;
           }
 
@@ -117,22 +122,30 @@ const RightSidebar = memo(
             name: role.name,
             color: role.color,
             orderNr: role.orderNr,
-            users: usersInGroup.map((u) => ({ userId: u.id, name: u.name, banned: u.banned }))
+            users: usersInGroup.map((u) => ({
+              userId: u.id,
+              name: u.name,
+              banned: u.banned
+            }))
           });
         }
       }
 
       const offlineUsers = visibleUsers.filter((user) => {
         return user.status === 'offline';
-      })
+      });
 
       groups.sort((a, b) => a.orderNr - b.orderNr);
 
       groups.push({
-        name: "Offline",
-        color: "#353535",
+        name: 'Offline',
+        color: '#353535',
         orderNr: 0,
-        users: offlineUsers.map((u) => ({ userId: u.id, name: u.name, banned: u.banned }))
+        users: offlineUsers.map((u) => ({
+          userId: u.id,
+          name: u.name,
+          banned: u.banned
+        }))
       });
 
       return groups;

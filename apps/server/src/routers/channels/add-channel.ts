@@ -1,4 +1,9 @@
-import { ActivityLogType, ChannelType, Permission, ChannelPermission } from '@sharkord/shared';
+import {
+  ActivityLogType,
+  ChannelPermission,
+  ChannelType,
+  Permission
+} from '@sharkord/shared';
 import { randomUUIDv7 } from 'bun';
 import { desc, eq, isNull } from 'drizzle-orm';
 import { z } from 'zod';
@@ -8,8 +13,8 @@ import { getAffectedUserIdsForChannel } from '../../db/queries/channels';
 import { channels, channelUserPermissions } from '../../db/schema';
 import { enqueueActivityLog } from '../../queues/activity-log';
 import { VoiceRuntime } from '../../runtimes/voice';
-import { protectedProcedure } from '../../utils/trpc';
 import { invariant } from '../../utils/invariant';
+import { protectedProcedure } from '../../utils/trpc';
 
 const addChannelRoute = protectedProcedure
   .input(
@@ -25,10 +30,9 @@ const addChannelRoute = protectedProcedure
     let isPrivate = false;
     if (input.type !== ChannelType.PRIVATE) {
       await ctx.needsPermission(Permission.MANAGE_CHANNELS);
-    }
-    else {
+    } else {
       isPrivate = true;
-      invariant(input.userIdA && input.userIdB, "Malformed Request");
+      invariant(input.userIdA && input.userIdB, 'Malformed Request');
     }
 
     const channel = await db.transaction(async (tx) => {
@@ -67,7 +71,10 @@ const addChannelRoute = protectedProcedure
       return newChannel;
     });
 
-    if (channel.type === ChannelType.VOICE || channel.type === ChannelType.PRIVATE) {
+    if (
+      channel.type === ChannelType.VOICE ||
+      channel.type === ChannelType.PRIVATE
+    ) {
       const runtime = new VoiceRuntime(channel.id);
 
       await runtime.init();
@@ -84,22 +91,20 @@ const addChannelRoute = protectedProcedure
       }
     });
 
-
     if (channel.type === ChannelType.PRIVATE) {
-
       const permissions = Object.values(ChannelPermission);
       const now = Date.now();
 
-      const userChannelPermissions =
-        [input.userIdA, input.userIdB].flatMap((userId) =>
+      const userChannelPermissions = [input.userIdA, input.userIdB].flatMap(
+        (userId) =>
           permissions.map((permission) => ({
             channelId: channel.id,
             userId: userId!,
             permission,
             allow: true,
-            createdAt: now,
+            createdAt: now
           }))
-        );
+      );
 
       await db.insert(channelUserPermissions).values(userChannelPermissions);
 
@@ -136,7 +141,6 @@ const addChannelRoute = protectedProcedure
       });
 
       publishChannel(channel.id, 'update');
-
     }
 
     return channel.id;

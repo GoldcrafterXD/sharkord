@@ -26,10 +26,13 @@ const leaveVoiceRoute = protectedProcedure.mutation(async ({ ctx }) => {
     message: 'Channel not found'
   });
 
-  invariant(channel.type === ChannelType.VOICE || channel.type === ChannelType.PRIVATE, {
-    code: 'BAD_REQUEST',
-    message: 'Channel is not a voice channel'
-  });
+  invariant(
+    channel.type === ChannelType.VOICE || channel.type === ChannelType.PRIVATE,
+    {
+      code: 'BAD_REQUEST',
+      message: 'Channel is not a voice channel'
+    }
+  );
 
   const runtime = VoiceRuntime.findById(ctx.currentVoiceChannelId);
 

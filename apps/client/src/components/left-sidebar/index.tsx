@@ -15,15 +15,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@sharkord/ui';
-import { Menu, ChevronDown } from 'lucide-react';
+import { ChevronDown, Menu } from 'lucide-react';
 import { memo, useMemo, useState } from 'react';
 import { Dialog } from '../dialogs/dialogs';
 import { Protect } from '../protect';
 import { ServerScreen } from '../server-screens/screens';
 import { Categories } from './categories';
+import { PrivateChannels } from './private-messaging';
 import { UserControl } from './user-control';
 import { VoiceControl } from './voice-control';
-import { PrivateChannels } from './private-messaging'; 
 
 const MIN_WIDTH = 200;
 const MAX_WIDTH = 400;
@@ -33,9 +33,8 @@ type TLeftSidebarProps = {
   className?: string;
 };
 
-
 const ServerTabSandwich = memo(() => {
-    const serverSettingsPermissions = useMemo(
+  const serverSettingsPermissions = useMemo(
     () => [
       Permission.MANAGE_SETTINGS,
       Permission.MANAGE_ROLES,
@@ -58,9 +57,7 @@ const ServerTabSandwich = memo(() => {
         <DropdownMenuLabel>Server</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <Protect permission={Permission.MANAGE_CATEGORIES}>
-          <DropdownMenuItem
-            onClick={() => openDialog(Dialog.CREATE_CATEGORY)}
-          >
+          <DropdownMenuItem onClick={() => openDialog(Dialog.CREATE_CATEGORY)}>
             Add Category
           </DropdownMenuItem>
         </Protect>
@@ -83,7 +80,7 @@ const ServerTabSandwich = memo(() => {
 const LeftSidebar = memo(({ className }: TLeftSidebarProps) => {
   const serverName = useServerName();
   const [tabState, setTabState] = useState(0);
-  const tabName = [serverName, "Private Messages"];
+  const tabName = [serverName, 'Private Messages'];
   return (
     <ResizableSidebar
       storageKey={LocalStorageKey.LEFT_SIDEBAR_WIDTH}
@@ -96,27 +93,22 @@ const LeftSidebar = memo(({ className }: TLeftSidebarProps) => {
       <div className="flex w-full justify-between h-12 items-center border-b border-border px-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button
-              className="flex items-center gap-2 font-semibold text-foreground select-none hover:bg-accent px-2 py-1 rounded-md transition-colors">
+            <button className="flex items-center gap-2 font-semibold text-foreground select-none hover:bg-accent px-2 py-1 rounded-md transition-colors">
               {tabName[tabState]}
               <ChevronDown className="h-4 w-4 opacity-70" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuItem
-              onClick={() => setTabState(0)}
-            >
+            <DropdownMenuItem onClick={() => setTabState(0)}>
               {serverName}
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => setTabState(1)}
-            >
+            <DropdownMenuItem onClick={() => setTabState(1)}>
               Private Messages
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
         <div>
-          <ServerTabSandwich/>
+          <ServerTabSandwich />
         </div>
       </div>
       <div className="flex-1 overflow-y-auto">
