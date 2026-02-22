@@ -93,7 +93,7 @@ type TChannelProps = {
 
 const PrivateChannel = memo(({ channelId, isSelected }: TChannelProps) => {
   const channel = useChannelById(channelId);
-  const channelCan = useChannelCan(channelId);
+  const channelCan = useChannelCan(channelId, true);
 
   const {
     attributes,
@@ -112,7 +112,7 @@ const PrivateChannel = memo(({ channelId, isSelected }: TChannelProps) => {
     return null;
   }
 
-  if (!channelCan(ChannelPermission.ACCESS_PRIVATE_CHANNEL)) return null;
+  if (!channelCan(ChannelPermission.VIEW_CHANNEL)) return null;
 
   return (
     <div

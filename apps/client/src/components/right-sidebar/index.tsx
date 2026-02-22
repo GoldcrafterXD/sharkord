@@ -81,7 +81,6 @@ type TRightSidebarProps = {
 const RightSidebar = memo(
   ({ className, isOpen = true }: TRightSidebarProps) => {
     const users = useUsers();
-    console.log(JSON.stringify(users))
     const visibleUsers = useMemo(
       () =>
         users

@@ -76,14 +76,17 @@ export const useCan = () => {
   return can;
 };
 
-export const useChannelCan = (channelId: number | undefined) => {
+export const useChannelCan = (
+  channelId: number | undefined,
+  ignoreOwner?: boolean 
+) => {
   const ownUserRoles = useChannelPermissionsById(channelId || -1);
   const isOwner = useIsOwnUserOwner();
   const channel = useChannelById(channelId || -1);
 
   const can = useCallback(
     (permission: ChannelPermission) => {
-      if (isOwner || !channel || !channel?.private) return true;
+      if ((isOwner && !ignoreOwner) || !channel || !channel?.private) return true;
 
       // if VIEW is false, no other permission matters
       if (ownUserRoles.permissions[ChannelPermission.VIEW_CHANNEL] === false)
@@ -91,7 +94,7 @@ export const useChannelCan = (channelId: number | undefined) => {
 
       return ownUserRoles.permissions[permission] === true;
     },
-    [ownUserRoles, isOwner, channel]
+    [ownUserRoles, isOwner, channel, ignoreOwner]
   );
 
   return can;
