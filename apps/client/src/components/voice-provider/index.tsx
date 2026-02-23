@@ -25,6 +25,7 @@ import {
   useState
 } from 'react';
 import { useDevices } from '../devices-provider/hooks/use-devices';
+import { AudioEngine } from './audio-processing/AudioEngine';
 import { FloatingPinnedCard } from './floating-pinned-card';
 import { useLocalStreams } from './hooks/use-local-streams';
 import { useRemoteStreams } from './hooks/use-remote-streams';
@@ -208,27 +209,66 @@ const VoiceProvider = memo(({ children }: TVoiceProviderProps) => {
 
   const startMicStream = useCallback(async () => {
     try {
-      logVoice('Starting microphone stream');
+      logVoice('Starting microphone stream with Custom Noise Reduction');
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          deviceId: {
-            exact: devices.microphoneId
+      let audioTrack: MediaStreamTrack | undefined;
+      let rawStream: MediaStream | undefined;
+
+      if (devices.customNoiseSuppression) {
+        rawStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            deviceId: {
+              exact: devices.microphoneId
+            },
+            autoGainControl: devices.autoGainControl,
+            echoCancellation: false,
+            noiseSuppression: false,
+            sampleRate: 48000,
+            channelCount: 1
           },
-          autoGainControl: devices.autoGainControl,
-          echoCancellation: devices.echoCancellation,
-          noiseSuppression: devices.noiseSuppression,
-          sampleRate: 48000,
-          channelCount: 2
-        },
-        video: false
-      });
+          video: false
+        });
 
-      logVoice('Microphone stream obtained', { stream });
+        try {
+          const audioEngine = new AudioEngine();
+          const processedStream = await audioEngine.init(rawStream);
 
-      setLocalAudioStream(stream);
+          setLocalAudioStream(processedStream);
 
-      const audioTrack = stream.getAudioTracks()[0];
+          audioTrack = processedStream.getAudioTracks()[0];
+        } catch (error) {
+          logVoice(
+            'Error obtaining microphone stream, falling back to unprocessed stream',
+            { error }
+          );
+
+          logVoice('Fallback Microphone stream obtained', { rawStream });
+
+          setLocalAudioStream(rawStream);
+
+          audioTrack = rawStream.getAudioTracks()[0];
+        }
+      } else {
+        logVoice('Starting microphone stream with standard Handling');
+
+        rawStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            deviceId: {
+              exact: devices.microphoneId
+            },
+            autoGainControl: devices.autoGainControl,
+            echoCancellation: devices.echoCancellation,
+            noiseSuppression: devices.noiseSuppression,
+            sampleRate: 48000,
+            channelCount: 1
+          },
+          video: false
+        });
+
+        setLocalAudioStream(rawStream);
+
+        audioTrack = rawStream.getAudioTracks()[0];
+      }
 
       if (audioTrack) {
         audioTrack.enabled = !ownVoiceState.micMuted;
@@ -238,7 +278,7 @@ const VoiceProvider = memo(({ children }: TVoiceProviderProps) => {
         localAudioProducer.current = await producerTransport.current?.produce({
           track: audioTrack,
           codecOptions: {
-            opusStereo: true,
+            opusStereo: false,
             opusFec: true,
             opusDtx: true,
             opusMaxPlaybackRate: 48000,
@@ -290,6 +330,7 @@ const VoiceProvider = memo(({ children }: TVoiceProviderProps) => {
     devices.autoGainControl,
     devices.echoCancellation,
     devices.noiseSuppression,
+    devices.customNoiseSuppression,
     ownVoiceState.micMuted
   ]);
 

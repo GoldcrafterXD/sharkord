@@ -22,6 +22,7 @@ const DEFAULT_DEVICE_SETTINGS: TDeviceSettings = {
   webcamFramerate: 30,
   echoCancellation: false,
   noiseSuppression: false,
+  customNoiseSuppression: true,
   autoGainControl: true,
   shareSystemAudio: true,
   mirrorOwnVideo: false,

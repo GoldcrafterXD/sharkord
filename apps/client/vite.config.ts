@@ -6,6 +6,7 @@ import pkg from './package.json';
 
 // https://vite.dev/config/
 export default defineConfig({
+  assetsInclude: ['**/*.wasm'],
   plugins: [react(), tailwindcss()],
   build: {
     target: 'esnext'

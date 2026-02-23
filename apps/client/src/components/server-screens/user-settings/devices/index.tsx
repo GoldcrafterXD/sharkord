@@ -100,6 +100,7 @@ const Devices = memo(() => {
                 onCheckedChange={(checked) =>
                   onChange('echoCancellation', checked)
                 }
+                disabled={!!values.customNoiseSuppression}
               />
             </Group>
 
@@ -109,6 +110,7 @@ const Devices = memo(() => {
                 onCheckedChange={(checked) =>
                   onChange('noiseSuppression', checked)
                 }
+                disabled={!!values.customNoiseSuppression}
               />
             </Group>
 
@@ -117,6 +119,15 @@ const Devices = memo(() => {
                 checked={!!values.autoGainControl}
                 onCheckedChange={(checked) =>
                   onChange('autoGainControl', checked)
+                }
+              />
+            </Group>
+
+            <Group label="Custom Noise suppression">
+              <Switch
+                checked={!!values.customNoiseSuppression}
+                onCheckedChange={(checked) =>
+                  onChange('customNoiseSuppression', checked)
                 }
               />
             </Group>
