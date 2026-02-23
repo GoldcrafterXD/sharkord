@@ -23,6 +23,7 @@
     "@sharkord/shared": "workspace:*",
     "@sharkord/ui": "workspace:*",
     "@tailwindcss/vite": "^4.1.13",
+    "@timephy/rnnoise-wasm": "^1.0.0",
     "@tiptap/core": "^3.7.2",
     "@tiptap/extension-emoji": "^3.7.2",
     "@tiptap/extension-link": "^3.20.0",

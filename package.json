@@ -22,6 +22,7 @@
     "knip": "^5.85.0"
   },
   "dependencies": {
+    "@timephy/rnnoise-wasm": "^1.0.0",
     "systeminformation": "^5.31.1"
   }
 }

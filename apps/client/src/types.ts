@@ -48,6 +48,7 @@ export type TDeviceSettings = {
   webcamFramerate: number;
   echoCancellation: boolean;
   noiseSuppression: boolean;
+  customNoiseSuppression: boolean;
   autoGainControl: boolean;
   shareSystemAudio: boolean;
   mirrorOwnVideo: boolean;
