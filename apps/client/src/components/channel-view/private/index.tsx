@@ -1,5 +1,7 @@
-import { PluginSlotRenderer } from '@/components/plugin-slot-renderer';
-import { TiptapInput } from '@/components/tiptap-input';
+import {
+  MessageCompose,
+  type TMessageComposeHandle
+} from '@/components/message-compose';
 import { setSelectedChannelId } from '@/features/server/channels/actions';
 import { useChannelById } from '@/features/server/channels/hooks';
 import {
@@ -11,26 +13,26 @@ import { playSound } from '@/features/server/sounds/actions';
 import { SoundType } from '@/features/server/types';
 import { joinVoice } from '@/features/server/voice/actions';
 import { useVoice } from '@/features/server/voice/hooks';
-import { useUploadFiles } from '@/hooks/use-upload-files';
 import { getTRPCClient } from '@/lib/trpc';
 import {
   ChannelPermission,
-  PluginSlot,
   TYPING_MS,
   getTrpcError,
-  isEmptyMessage
+  linkifyHtml
 } from '@sharkord/shared';
-import { Button, Spinner } from '@sharkord/ui';
-import { filesize } from 'filesize';
+import { Spinner } from '@sharkord/ui';
 import { throttle } from 'lodash-es';
-import { Paperclip, Phone, Send } from 'lucide-react';
+import { Phone } from 'lucide-react';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
-import { FileCard } from '../text//file-card';
 import { TextSkeleton } from '../text//text-skeleton';
 import { useScrollController } from '../text//use-scroll-controller';
-import { UsersTyping } from '../text//users-typing';
 import { MessagesGroup } from '../text/messages-group';
+import {
+  getChannelDraftKey,
+  getDraftMessage,
+  setDraftMessage
+} from '../text/use-draft-messages';
 
 type TChannelProps = {
   channelId: number;
@@ -40,10 +42,14 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
   const { messages, hasMore, loadMore, loading, fetching, groupedMessages } =
     useMessages(channelId);
 
-  const [newMessage, setNewMessage] = useState('');
   const typingUsers = useTypingUsersByChannelId(channelId);
   const channel = useChannelById(channelId);
   const { init } = useVoice();
+  const composeRef = useRef<TMessageComposeHandle>(null);
+  const draftChannelKey = getChannelDraftKey(channelId);
+  const [newMessage, setNewMessage] = useState(
+    getDraftMessage(draftChannelKey)
+  );
 
   const { containerRef, onScroll } = useScrollController({
     messages,
@@ -52,31 +58,7 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
     loadMore,
     hasTypingUsers: typingUsers.length > 0
   });
-
-  // keep this ref just as a safeguard
-  const sendingRef = useRef(false);
-  const [sending, setSending] = useState(false);
   const channelCan = useChannelCan(channelId, true);
-
-  const canSendMessages = useMemo(() => {
-    return channelCan(ChannelPermission.SEND_MESSAGES);
-  }, [channelCan]);
-
-  const canUploadFiles = useMemo(() => {
-    return channelCan(ChannelPermission.SEND_MESSAGES);
-  }, [channelCan]);
-
-  const pluginCommands = undefined;
-
-  const {
-    files,
-    removeFile,
-    clearFiles,
-    uploading,
-    uploadingSize,
-    openFileDialog,
-    fileInputProps
-  } = useUploadFiles(!canSendMessages);
 
   const sendTypingSignal = useMemo(
     () =>
@@ -92,61 +74,33 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
     [channelId]
   );
 
-  const onSendMessage = useCallback(async () => {
-    if (
-      (isEmptyMessage(newMessage) && !files.length) ||
-      !canSendMessages ||
-      sendingRef.current
-    ) {
-      return;
-    }
-
-    setSending(true);
-    sendingRef.current = true;
-    sendTypingSignal.cancel();
-
-    const trpc = getTRPCClient();
-
-    try {
-      await trpc.messages.send.mutate({
-        content: newMessage,
-        channelId,
-        files: files.map((f) => f.id)
-      });
-
-      playSound(SoundType.MESSAGE_SENT);
-    } catch (error) {
-      toast.error(getTrpcError(error, 'Failed to send message'));
-      return;
-    } finally {
-      sendingRef.current = false;
-      setSending(false);
-    }
-
-    setNewMessage('');
-    clearFiles();
-  }, [
-    newMessage,
-    channelId,
-    files,
-    clearFiles,
-    sendTypingSignal,
-    canSendMessages
-  ]);
-
-  const onRemoveFileClick = useCallback(
-    async (fileId: string) => {
-      removeFile(fileId);
-
-      const trpc = getTRPCClient();
-
-      try {
-        trpc.files.deleteTemporary.mutate({ fileId });
-      } catch {
-        // ignore error
-      }
+  const setNewMessageHandler = useCallback(
+    (value: string) => {
+      setNewMessage(value);
+      setDraftMessage(draftChannelKey, value);
     },
-    [removeFile]
+    [setNewMessage, draftChannelKey]
+  );
+
+  const onSend = useCallback(
+    async (message: string, files: { id: string }[]) => {
+      sendTypingSignal.cancel();
+      const trpc = getTRPCClient();
+      try {
+        await trpc.messages.send.mutate({
+          content: linkifyHtml(message),
+          channelId,
+          files: files.map((f) => f.id)
+        });
+        playSound(SoundType.MESSAGE_SENT);
+      } catch (error) {
+        toast.error(getTrpcError(error, 'Failed to send message'));
+        return false;
+      }
+      setNewMessageHandler('');
+      return true;
+    },
+    [channelId, sendTypingSignal, setNewMessageHandler]
   );
 
   const onCall = useCallback(async () => {
@@ -208,64 +162,16 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
           ))}
         </div>
       </div>
-
-      <div className="flex shrink-0 flex-col gap-2 border-t border-border p-2 pb-[calc(env(safe-area-inset-bottom)+0.5rem)]">
-        {uploading && (
-          <div className="flex items-center gap-2">
-            <div className="text-xs text-muted-foreground mb-1">
-              Uploading files ({filesize(uploadingSize)})
-            </div>
-            <Spinner size="xxs" />
-          </div>
-        )}
-        {files.length > 0 && (
-          <div className="flex gap-1 flex-wrap">
-            {files.map((file) => (
-              <FileCard
-                key={file.id}
-                name={file.originalName}
-                extension={file.extension}
-                size={file.size}
-                onRemove={() => onRemoveFileClick(file.id)}
-              />
-            ))}
-          </div>
-        )}
-        <UsersTyping channelId={channelId} />
-        <div className="flex items-center gap-2 rounded-lg">
-          <TiptapInput
-            value={newMessage}
-            onChange={setNewMessage}
-            onSubmit={onSendMessage}
-            onTyping={sendTypingSignal}
-            disabled={uploading || !canSendMessages}
-            readOnly={sending}
-            commands={pluginCommands}
-          />
-          <PluginSlotRenderer slotId={PluginSlot.CHAT_ACTIONS} />
-          <input {...fileInputProps} />
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8"
-            disabled={uploading || !canUploadFiles}
-            onClick={openFileDialog}
-          >
-            <Paperclip className="h-4 w-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8"
-            onClick={onSendMessage}
-            disabled={
-              uploading || sending || files.length === 0 || !canSendMessages
-            }
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+      <MessageCompose
+        ref={composeRef}
+        channelId={channelId}
+        message={newMessage}
+        onMessageChange={setNewMessageHandler}
+        onSend={onSend}
+        onTyping={sendTypingSignal}
+        typingUsers={typingUsers}
+        showPluginSlot
+      />
     </>
   );
 });
