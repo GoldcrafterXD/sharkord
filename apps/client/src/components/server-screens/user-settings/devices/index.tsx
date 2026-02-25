@@ -298,12 +298,12 @@ const Devices = memo(() => {
               </Group>
 
               <Group label="Custom Noise suppression">
-              <Switch
-                checked={!!values.customNoiseSuppression}
-                onCheckedChange={(checked) =>
-                  onChange('customNoiseSuppression', checked)
-                }
-              />
+                <Switch
+                  checked={!!values.customNoiseSuppression}
+                  onCheckedChange={(checked) =>
+                    onChange('customNoiseSuppression', checked)
+                  }
+                />
               </Group>
 
               <Group label="Automatic gain control">
