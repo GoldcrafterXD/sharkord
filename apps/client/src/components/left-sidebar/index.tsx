@@ -2,10 +2,20 @@ import { ResizableSidebar } from '@/components/resizable-sidebar';
 import { openDialog } from '@/features/dialogs/actions';
 import { openServerScreen } from '@/features/server-screens/actions';
 import { disconnectFromServer } from '@/features/server/actions';
-import { useServerName } from '@/features/server/hooks';
+import { useChannels } from '@/features/server/channels/hooks';
+import {
+  useServerName,
+  useUnreadMessagesCountByIds
+} from '@/features/server/hooks';
+import { useOwnUserId } from '@/features/server/users/hooks';
 import { LocalStorageKey } from '@/helpers/storage';
 import { cn } from '@/lib/utils';
-import { Permission } from '@sharkord/shared';
+import {
+  ChannelPermission,
+  Permission,
+  type TChannelUserPermission,
+  type TJoinedChannel
+} from '@sharkord/shared';
 import {
   Button,
   DropdownMenu,
@@ -81,6 +91,26 @@ const LeftSidebar = memo(({ className }: TLeftSidebarProps) => {
   const serverName = useServerName();
   const [tabState, setTabState] = useState(0);
   const tabName = [serverName, 'Private Messages'];
+  const channels = useChannels();
+  const ownUserId = useOwnUserId();
+  const privateChannelsWithAccess = channels.filter(
+    (channel: TJoinedChannel) => {
+      return channel.channelPermissions.find(
+        (channelPermission: TChannelUserPermission) =>
+          channelPermission.userId === ownUserId &&
+          channelPermission.permission ===
+            ChannelPermission.ACCESS_PRIVATE_CHANNEL
+      );
+    }
+  );
+
+  const privateChannelIds = useMemo(
+    () => privateChannelsWithAccess.map((channel) => channel.id),
+    [privateChannelsWithAccess]
+  );
+
+  const unreadCount = useUnreadMessagesCountByIds(privateChannelIds);
+
   return (
     <ResizableSidebar
       storageKey={LocalStorageKey.LEFT_SIDEBAR_WIDTH}
@@ -95,6 +125,11 @@ const LeftSidebar = memo(({ className }: TLeftSidebarProps) => {
           <DropdownMenuTrigger asChild>
             <button className="flex items-center gap-2 font-semibold text-foreground select-none hover:bg-accent px-2 py-1 rounded-md transition-colors">
               {tabName[tabState]}
+              {unreadCount > 0 && (
+                <div className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </div>
+              )}
               <ChevronDown className="h-4 w-4 opacity-70" />
             </button>
           </DropdownMenuTrigger>
@@ -104,6 +139,11 @@ const LeftSidebar = memo(({ className }: TLeftSidebarProps) => {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => setTabState(1)}>
               Private Messages
+              {unreadCount > 0 && (
+                <div className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground">
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </div>
+              )}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
