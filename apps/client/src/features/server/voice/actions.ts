@@ -7,6 +7,7 @@ import {
 } from '@/helpers/storage';
 import { getTRPCClient } from '@/lib/trpc';
 import {
+  ChannelType,
   getTrpcError,
   type TExternalStream,
   type TVoiceUserState
@@ -18,6 +19,7 @@ import {
   setSelectedChannelId
 } from '../channels/actions';
 import {
+  channelByIdSelector,
   currentVoiceChannelIdSelector,
   selectedChannelIdSelector
 } from '../channels/selectors';
@@ -165,8 +167,12 @@ export const leaveVoice = async (): Promise<void> => {
   if (!currentChannelId) {
     return;
   }
+  const channelToLeave = channelByIdSelector(state, currentChannelId);
 
-  if (selectedChannelId === currentChannelId) {
+  if (
+    selectedChannelId === currentChannelId &&
+    channelToLeave!.type === ChannelType.VOICE
+  ) {
     setSelectedChannelId(undefined);
   }
 

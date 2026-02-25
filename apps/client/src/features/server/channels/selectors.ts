@@ -29,6 +29,15 @@ export const channelReadStateByIdSelector = (
   channelId: number
 ) => state.server.readStatesMap[channelId] ?? 0;
 
+export const channelReadStateByIdsSelector = (
+  state: IRootState,
+  channelIds: number[]
+) =>
+  channelIds.reduce(
+    (count, channelId) => count + (state.server.readStatesMap[channelId] ?? 0),
+    0
+  );
+
 export const channelByIdSelector = createCachedSelector(
   [channelsSelector, (_: IRootState, channelId: number) => channelId],
   (channels, channelId) => channels.find((channel) => channel.id === channelId)

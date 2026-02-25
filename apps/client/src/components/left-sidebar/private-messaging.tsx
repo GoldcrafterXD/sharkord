@@ -4,14 +4,25 @@ import {
   useChannels,
   useSelectedChannelId
 } from '@/features/server/channels/hooks';
-import { useChannelCan, useUnreadMessagesCount } from '@/features/server/hooks';
+import {
+  useChannelCan,
+  useUnreadMessagesCount,
+  useVoiceUsersByChannelId
+} from '@/features/server/hooks';
+import { useOwnUserId, useUserById } from '@/features/server/users/hooks';
 import { getInitialsFromName } from '@/helpers/get-initials-from-name';
 import { cn } from '@/lib/utils';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ChannelPermission, type TJoinedChannel } from '@sharkord/shared';
+import {
+  ChannelPermission,
+  type TChannelUserPermission,
+  type TJoinedChannel
+} from '@sharkord/shared';
 import { Avatar, AvatarFallback } from '@sharkord/ui';
+import { Phone } from 'lucide-react';
 import { memo, useCallback } from 'react';
+import { UserAvatar } from '../user-avatar';
 
 type TVoiceProps = Omit<TItemWrapperProps, 'children'> & {
   channel: TJoinedChannel;
@@ -19,19 +30,53 @@ type TVoiceProps = Omit<TItemWrapperProps, 'children'> & {
 
 const Private = memo(({ channel, ...props }: TVoiceProps) => {
   const unreadCount = useUnreadMessagesCount(channel.id);
+  const thisChannel = useChannelById(channel.id);
+  const ownUserId = useOwnUserId();
+  let channelName = thisChannel!.name;
+  const hasActiveVoiceCall = useVoiceUsersByChannelId(channel.id).length > 0;
+  const accessPrivateChannelPermissions =
+    thisChannel!.channelPermissions.filter(
+      (channelPermission: TChannelUserPermission) =>
+        channelPermission.permission ===
+        ChannelPermission.ACCESS_PRIVATE_CHANNEL
+    );
+  const isNotGroupDm = accessPrivateChannelPermissions.length === 2;
+  let otherUserId: number | undefined;
+
+  if (isNotGroupDm) {
+    otherUserId = accessPrivateChannelPermissions.find(
+      (channelPermission: TChannelUserPermission) =>
+        channelPermission.userId != ownUserId
+    )!.userId;
+  }
+
+  const otherUser = useUserById(otherUserId!);
+
+  if (otherUser) {
+    channelName = otherUser?.name;
+  }
 
   return (
     <>
       <ItemWrapper {...props}>
-        <Avatar className={cn('h-8 w-8', 'h-8 w-8')}>
-          <AvatarFallback className="bg-muted text-xs">
-            {getInitialsFromName(channel.name)}
-          </AvatarFallback>
-        </Avatar>
-        <span className="flex-1">{channel.name}</span>
+        {isNotGroupDm && otherUserId ? (
+          <UserAvatar userId={otherUserId} className="h-8 w-8 shrink-0" />
+        ) : (
+          <Avatar className={cn('h-8 w-8', 'h-8 w-8')}>
+            <AvatarFallback className="bg-muted text-xs">
+              {getInitialsFromName(channel.name)}
+            </AvatarFallback>
+          </Avatar>
+        )}
+        <span className="flex-1">{channelName}</span>
         {unreadCount > 0 && (
           <div className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground">
             {unreadCount > 99 ? '99+' : unreadCount}
+          </div>
+        )}
+        {hasActiveVoiceCall && (
+          <div className="px-1.5">
+            <Phone className="h-4 w-4 text-green-500" />
           </div>
         )}
       </ItemWrapper>
