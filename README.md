@@ -1,17 +1,15 @@
+
 <div align="center">
+
+# NOTE
+This is a Fork, containing several changes not wanted in the original Project, check out the original Project. 
+
+[Original Sharkord Repo](https://github.com/Sharkord/sharkord)
+
+For a list of additional Features in comparison to the Main Sharkord, see the bottom of the README
+
   <h1>Sharkord</h1>
   <p><strong>A lightweight, self-hosted real-time communication platform</strong></p>
-  
-  [![Version](https://img.shields.io/github/v/release/Sharkord/sharkord)](https://github.com/Sharkord/sharkord/releases)
-  [![License](https://img.shields.io/github/license/Sharkord/sharkord)](LICENSE)
-  [![Downloads](https://img.shields.io/github/downloads/Sharkord/sharkord/total)](https://github.com/Sharkord/sharkord/releases)
-  [![Last Commit](https://img.shields.io/github/last-commit/Sharkord/sharkord)](https://github.com/Sharkord/sharkord/commits)
-  
-  [![Bun](https://img.shields.io/badge/Bun-v1.3.5-green.svg)](https://bun.sh)
-  [![Mediasoup](https://img.shields.io/badge/Mediasoup-v3.19.11-green.svg)](https://mediasoup.org)
-</div>
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/B0B71U3476)
 
 ## What is Sharkord?
 
@@ -22,37 +20,35 @@ Sharkord is a self-hosted communication platform that brings the most important 
 
 ## Docs
 
-For detailed documentation, please visit our [Documentation](https://sharkord.com/docs).
+For detailed documentation, please visit the original Repos [Documentation](https://sharkord.com/docs). The changes done in this Fork are undocumented. 
 
 ## Wanna Try It Out?
 
-Check out the Live Demo at [demo.sharkord.com](https://demo.sharkord.com). The amount of ports opened for the demo is limited, so voice and video features will only work for a couple of users at a time. If you want to test it with a larger group, we recommend running your own instance.
+Take a look at the original Sharkord Repos [Wanna Try It Out?](https://github.com/Sharkord/sharkord?tab=readme-ov-file#wanna-try-it-out) section
 
 ## Getting Started
 
-Sharkord is distributed as a standalone binary that bundles both server and client components. Get started by downloading the latest release for your platform from the [Releases](https://github.com/Sharkord/sharkord/releases) page. We ship binaries for Windows, macOS, and Linux.
+There will probably never be proper Releases for this Fork, so your best bet is to clone the Project, install the dependencies and build it yourself
 
 #### Linux x64
 
 ```bash
-curl -L https://github.com/sharkord/sharkord/releases/latest/download/sharkord-linux-x64 -o sharkord
-chmod +x sharkord
-./sharkord
+git clone https://github.com/GoldcrafterXD/sharkord
+cd sharkord
+bun install
+cd apps/server
+bun run build
 ```
 
-#### Docker
-
-Sharkord can also be run using Docker. Here's how to run it:
-
+Should result in several executables in 
 ```bash
-docker run \
-  -p 4991:4991/tcp \
-  -p 40000:40000/tcp \
-  -p 40000:40000/udp \
-  -v ./data:/root/.config/sharkord \
-  --name sharkord \
-  sharkord/sharkord:latest
-```
+apps/server/build/out
+``` 
+including \
+linux-x64 \
+linux-arm64 \
+windows-x64 \
+darwin-arm64
 
 > [!NOTE]
 > Upon first launch, Sharkord will create a secure token and print it to the console. This token allows ANYONE to gain owner access to your server, so make sure to store it securely and do not lose it!
@@ -61,13 +57,11 @@ Once the server is running, open your web browser and navigate to [http://localh
 
 Check out our [Documentation](https://sharkord.com/docs) for more detailed setup instructions, configuration options, and troubleshooting tips.
 
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
-
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+The original Project is licensed under the MIT License - see the bottom part of the [LICENSE](LICENSE) file
+
+The changes made to the project are licensed under the GPLv3 License - see the beginning of the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
@@ -82,11 +76,17 @@ Built with amazing open-source technologies:
 - [ShadCN UI](https://ui.shadcn.com/)
 - [Tailwind CSS](https://tailwindcss.com)
 
-<div align="center">
-  <p>Made with ❤️ by the Sharkord team</p>
-  <p>
-    <a href="https://github.com/Sharkord/sharkord">GitHub</a> •
-    <a href="https://github.com/Sharkord/sharkord/issues">Issues</a> •
-    <a href="https://github.com/Sharkord/sharkord/discussions">Discussions</a>
-  </p>
+
+## Additional Features
+
 </div>
+
+- Private Messaging
+- Grouped and Colored Roles in User Sidebar and Chats
+- Improved custom Noise Cancelling
+- Additional User Management Features 
+  - Username Management
+  - User Icon/Banner Management ( Planned, not implemented )
+
+> [!NOTE]
+> This Software is experimental and can break at any point in time
