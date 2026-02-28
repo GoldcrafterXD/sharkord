@@ -12,13 +12,15 @@ import {
 } from '@sharkord/shared';
 import { Tooltip } from '@sharkord/ui';
 import parse from 'html-react-parser';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import { FileCard } from '../file-card';
 import { MessageReactions } from '../message-reactions';
 import { ImageOverride } from '../overrides/image';
 import { serializer } from './serializer';
 import type { TFoundMedia } from './types';
+
+const MAX_INLINE_MEDIA = 4;
 
 type TMessageRendererProps = {
   message: TJoinedMessage;
@@ -88,6 +90,13 @@ const MessageRenderer = memo(
       return [...foundMedia, ...mediaFromFiles];
     }, [foundMedia, message.files]);
 
+    const [showAllMedia, setShowAllMedia] = useState(false);
+    const mediaToRender = useMemo(
+      () => (showAllMedia ? allMedia : allMedia.slice(0, MAX_INLINE_MEDIA)),
+      [allMedia, showAllMedia]
+    );
+    const hiddenMediaCount = allMedia.length - mediaToRender.length;
+
     return (
       <div className="flex flex-col gap-1">
         <div
@@ -121,7 +130,7 @@ const MessageRenderer = memo(
           )}
         </div>
 
-        {allMedia.map((media, index) => {
+        {mediaToRender.map((media, index) => {
           if (media.type === 'image') {
             return (
               <ImageOverride src={media.url} key={`media-image-${index}`} />
@@ -130,6 +139,17 @@ const MessageRenderer = memo(
 
           return null;
         })}
+
+        {hiddenMediaCount > 0 && (
+          <button
+            type="button"
+            className="text-xs text-primary hover:underline self-start"
+            onClick={() => setShowAllMedia(true)}
+          >
+            Show {hiddenMediaCount} more image
+            {hiddenMediaCount === 1 ? '' : 's'}
+          </button>
+        )}
 
         {!disableReactions && (
           <MessageReactions
