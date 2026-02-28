@@ -75,6 +75,9 @@ export type TStorageSettings = Pick<
   | 'storageUploadEnabled'
   | 'storageQuota'
   | 'storageUploadMaxFileSize'
+  | 'storageMaxAvatarSize'
+  | 'storageMaxBannerSize'
+  | 'storageMaxFilesPerMessage'
   | 'storageSpaceQuotaByUser'
   | 'storageOverflowAction'
 >;
@@ -136,6 +139,7 @@ export type TJoinedSettings = TSettings & {
 
 export type TJoinedInvite = TInvite & {
   creator: TJoinedPublicUser;
+  role: { id: number; name: string; color: string } | null;
 };
 
 export type TJoinedChannel = TChannel & {

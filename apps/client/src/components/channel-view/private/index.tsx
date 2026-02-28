@@ -25,12 +25,12 @@ import {
 } from '@sharkord/shared';
 import { Spinner } from '@sharkord/ui';
 import { throttle } from 'lodash-es';
-import { Phone } from 'lucide-react';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { TextSkeleton } from '../text//text-skeleton';
 import { useScrollController } from '../text//use-scroll-controller';
 import { MessagesGroup } from '../text/messages-group';
+import { TextTopbar } from '../text/text-top-bar';
 import {
   getChannelDraftKey,
   getDraftMessage,
@@ -43,14 +43,22 @@ type TChannelProps = {
 };
 
 const PrivateChannel = memo(({ channelId }: TChannelProps) => {
-  const { messages, hasMore, loadMore, loading, fetching, groupedMessages } =
-    useMessages(channelId);
+  const {
+    messages,
+    hasMore,
+    loadMore,
+    loading,
+    fetching,
+    groupedMessages,
+    scrollToMessage
+  } = useMessages(channelId);
 
   const typingUsers = useTypingUsersByChannelId(channelId);
   const channel = useChannelById(channelId);
   const { init } = useVoice();
   const composeRef = useRef<TMessageComposeHandle>(null);
   const draftChannelKey = getChannelDraftKey(channelId);
+
   const [newMessage, setNewMessage] = useState(
     getDraftMessage(draftChannelKey)
   );
@@ -74,6 +82,7 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
     loadMore,
     hasTypingUsers: typingUsers.length > 0
   });
+
   const channelCan = useChannelCan(channelId, true);
 
   const sendTypingSignal = useMemo(
@@ -101,18 +110,22 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
   const onSend = useCallback(
     async (message: string, files: { id: string }[]) => {
       sendTypingSignal.cancel();
+
       const trpc = getTRPCClient();
+
       try {
         await trpc.messages.send.mutate({
           content: linkifyHtml(message),
           channelId,
           files: files.map((f) => f.id)
         });
+
         playSound(SoundType.MESSAGE_SENT);
       } catch (error) {
         toast.error(getTrpcError(error, 'Failed to send message'));
         return false;
       }
+
       setNewMessageHandler('');
       return true;
     },
@@ -149,18 +162,23 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
         <VoiceChannel channelId={channelId} />
       ) : (
         <>
-          <div className="shrink-0 h-12 border-b border-border bg-background flex items-center justify-between px-4">
-            <div className="text-sm font-medium">{channel!.name!}</div>
-
-            <div className="flex items-center gap-2">
-              <button
-                className="text-xs text-muted-foreground hover:text-foreground"
-                onClick={onCall}
-              >
-                <Phone className="h-4 w-4" />
-              </button>
+          {fetching && (
+            <div className="absolute top-0 left-0 right-0 h-12 z-10 flex items-center justify-center">
+              <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border border-border rounded-full px-4 py-2 shadow-lg">
+                <Spinner size="xs" />
+                <span className="text-sm text-muted-foreground">
+                  Fetching older messages...
+                </span>
+              </div>
             </div>
-          </div>
+          )}
+
+          <TextTopbar
+            onScrollToMessage={scrollToMessage}
+            isPrivateChannel={true}
+            onCall={onCall}
+          />
+
           {currentlyActiveVoiceCall && (
             <div className="shrink-0 h-12 border border-green-500 bg-background flex items-center justify-between px-4">
               <div className="text-sm font-medium">
@@ -174,20 +192,11 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
               </div>
             </div>
           )}
-          {fetching && (
-            <div className="absolute top-0 left-0 right-0 h-12 z-10 flex items-center justify-center">
-              <div className="flex items-center gap-2 bg-background/80 backdrop-blur-sm border border-border rounded-full px-4 py-2 shadow-lg">
-                <Spinner size="xs" />
-                <span className="text-sm text-muted-foreground">
-                  Fetching older messages...
-                </span>
-              </div>
-            </div>
-          )}
 
           <div
             ref={containerRef}
             onScroll={onScroll}
+            data-messages-container
             className="flex-1 overflow-y-auto overflow-x-hidden p-2 animate-in fade-in duration-500"
           >
             <div className="space-y-4">
@@ -196,6 +205,7 @@ const PrivateChannel = memo(({ channelId }: TChannelProps) => {
               ))}
             </div>
           </div>
+
           <MessageCompose
             ref={composeRef}
             channelId={channelId}
