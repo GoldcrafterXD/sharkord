@@ -17,6 +17,7 @@ import {
   linkifyHtml
 } from '@sharkord/shared';
 import { Spinner } from '@sharkord/ui';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { throttle } from 'lodash-es';
 import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -59,6 +60,14 @@ const TextChannel = memo(({ channelId }: TChannelProps) => {
     hasMore,
     loadMore,
     hasTypingUsers: typingUsers.length > 0
+  });
+
+  const virtualizer = useVirtualizer({
+    count: groupedMessages.length,
+    getScrollElement: () => containerRef.current,
+    estimateSize: () => 260,
+    overscan: 8,
+    getItemKey: (index) => groupedMessages[index]?.[0]?.id ?? index
   });
 
   const channelCan = useChannelCan(channelId);
@@ -135,10 +144,35 @@ const TextChannel = memo(({ channelId }: TChannelProps) => {
         data-messages-container
         className="flex-1 overflow-y-auto overflow-x-hidden p-2 animate-in fade-in duration-500"
       >
-        <div className="space-y-4">
-          {groupedMessages.map((group, index) => (
-            <MessagesGroup key={index} group={group} />
-          ))}
+        <div
+          style={{
+            height: `${virtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative'
+          }}
+        >
+          {virtualizer.getVirtualItems().map((item) => {
+            const group = groupedMessages[item.index];
+
+            return (
+              <div
+                key={item.key}
+                ref={virtualizer.measureElement}
+                data-index={item.index}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${item.start}px)`
+                }}
+              >
+                <div className="pb-4">
+                  <MessagesGroup group={group} />
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 

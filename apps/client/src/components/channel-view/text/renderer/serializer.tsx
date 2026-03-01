@@ -12,7 +12,8 @@ const youtubeRegex =
 const serializer = (
   domNode: DOMNode,
   pushMedia: (media: TFoundMedia) => void,
-  messageId: number
+  messageId: number,
+  hasMedia?: () => void
 ) => {
   try {
     if (domNode instanceof Element && domNode.name === 'a') {
@@ -36,6 +37,7 @@ const serializer = (
         const tweetId = href.match(twitterRegex)?.[0].split('/').pop();
 
         if (tweetId) {
+          hasMedia?.();
           return <TwitterOverride tweetId={tweetId} />;
         }
       } else if (isYoutube) {
@@ -44,6 +46,7 @@ const serializer = (
         )?.[7];
 
         if (videoId) {
+          hasMedia?.();
           return <YoutubeOverride videoId={videoId} />;
         }
       } else if (isImage) {
