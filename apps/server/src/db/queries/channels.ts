@@ -1,5 +1,6 @@
 import {
   ChannelPermission,
+  ChannelType,
   OWNER_ROLE_ID,
   type TChannelUserPermissionsMap,
   type TJoinedChannel,
@@ -433,7 +434,7 @@ const getAffectedUserIdsForChannel = async (
       .where(inArray(userRoles.roleId, roleIds));
   }
 
-  // get users with the owner role because they have access to everything all the time
+  // get users with the owner role because they have access to everything all the time, but only if ChannelType is not PRIVATE
   const owners = await db
     .select({ userId: userRoles.userId })
     .from(userRoles)
@@ -442,8 +443,10 @@ const getAffectedUserIdsForChannel = async (
   const userIdSet = new Set<number>();
 
   usersWithDirectPerms.forEach((u) => userIdSet.add(u.userId));
-  usersWithRoles.forEach((u) => userIdSet.add(u.userId));
-  owners.forEach((u) => userIdSet.add(u.userId));
+  if (channel.type !== ChannelType.PRIVATE) {
+    usersWithRoles.forEach((u) => userIdSet.add(u.userId));
+    owners.forEach((u) => userIdSet.add(u.userId));
+  }
 
   return Array.from(userIdSet);
 };
