@@ -6,6 +6,7 @@ import { store } from '@/features/store';
 import { getFileUrl } from '@/helpers/get-file-url';
 import { getTRPCClient } from '@/lib/trpc';
 import {
+  ChannelType,
   getPlainTextFromHtml,
   TYPING_MS,
   type TJoinedMessage
@@ -38,8 +39,10 @@ const sendBrowserNotification = (
   }
 
   const textContent = getPlainTextFromHtml(message.content ?? '');
-
-  const title = `${user?.name ?? 'Unknown'} in #${channel?.name ?? 'unknown'}`;
+  let title = `${user?.name ?? 'Unknown'} in #${channel?.name ?? 'unknown'}`;
+  if (channel.type == ChannelType.PRIVATE) {
+    title = `${user?.name ?? 'Unknown'} sent you a message`;
+  }
   const body = textContent ? textContent : 'Sent an attachment';
   const icon = user?.avatar ? getFileUrl(user.avatar) : undefined;
 
