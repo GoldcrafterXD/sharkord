@@ -12,7 +12,7 @@ import {
 } from '@sharkord/shared';
 import { Tooltip } from '@sharkord/ui';
 import parse from 'html-react-parser';
-import { memo, useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { FileCard } from '../file-card';
 import { MessageReactions } from '../message-reactions';
@@ -41,17 +41,64 @@ const MessageRenderer = memo(
       () => isEmojiOnlyMessage(message.content),
       [message.content]
     );
+    const hasMediaRef = useRef(false);
+    hasMediaRef.current = false;
 
     const { foundMedia, messageHtml } = useMemo(() => {
       const foundMedia: TFoundMedia[] = [];
 
       const messageHtml = parse(message.content ?? '', {
         replace: (domNode) =>
-          serializer(domNode, (found) => foundMedia.push(found), message.id)
+          serializer(
+            domNode,
+            (found) => foundMedia.push(found),
+            message.id,
+            () => (hasMediaRef.current = true)
+          )
       });
 
       return { messageHtml, foundMedia };
     }, [message.content, message.id]);
+
+    const pickBestImage = (urls: string[] | undefined): string | undefined => {
+      if (!urls || urls.length === 0) return undefined;
+
+      const cleaned = urls.filter((url) => !/favicon|logo/.test(url));
+
+      // 1) Prefer gifs
+      let targetUrl = cleaned.find((url) => url.endsWith('.gif'));
+      if (targetUrl) return targetUrl;
+
+      // 2) Any Maxresdefault or hqdefault
+      targetUrl = cleaned.find((url) =>
+        /maxresdefault|hqdefault|max/.test(url)
+      );
+      if (targetUrl) return targetUrl;
+
+      // 3) Logos
+      targetUrl = urls.find((url) => /favicon|logo/.test(url));
+      if (targetUrl) return targetUrl;
+
+      // 4) Fallback to first remaining
+      return cleaned[0];
+    };
+
+    if (
+      foundMedia.length === 0 &&
+      message.metadata &&
+      message.metadata.length > 0 &&
+      !hasMediaRef.current
+    ) {
+      for (const metadata of message.metadata) {
+        const mediaUrl = pickBestImage(metadata.images);
+        if (mediaUrl) {
+          foundMedia.push({
+            type: 'image',
+            url: mediaUrl
+          });
+        }
+      }
+    }
 
     const onRemoveFileClick = useCallback(async (fileId: number) => {
       if (!fileId) return;

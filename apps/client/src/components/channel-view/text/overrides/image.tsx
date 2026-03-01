@@ -181,7 +181,7 @@ const ImageOverride = memo(({ src, alt }: TImageOverrideProps) => {
             crossOrigin="anonymous"
             loading="lazy"
             decoding="async"
-            fetchpriority="low"
+            fetchPriority="low"
           />
         )}
       </div>
