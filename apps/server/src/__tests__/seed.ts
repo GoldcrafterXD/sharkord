@@ -130,7 +130,9 @@ const seedTestDb = async (db: BunSQLiteDatabase) => {
     color: '#ff0000',
     isPersistent: true,
     isDefault: false,
-    createdAt: firstStart
+    createdAt: firstStart,
+    isGrouping: true,
+    orderNr: 0
   };
 
   await db.insert(roles).values(ownerRole);
@@ -148,7 +150,9 @@ const seedTestDb = async (db: BunSQLiteDatabase) => {
     color: '#99aab5',
     isPersistent: true,
     isDefault: true,
-    createdAt: firstStart
+    createdAt: firstStart,
+    isGrouping: true,
+    orderNr: 1
   };
 
   const [insertedDefaultRole] = await db
@@ -169,7 +173,9 @@ const seedTestDb = async (db: BunSQLiteDatabase) => {
     color: '#95a5a6',
     isPersistent: false,
     isDefault: false,
-    createdAt: firstStart
+    createdAt: firstStart,
+    isGrouping: true,
+    orderNr: 2
   };
 
   await db.insert(roles).values(guestRole);

@@ -1,6 +1,7 @@
 import { PluginAvatar } from '@/components/plugin-avatar';
 import { RelativeTime } from '@/components/relative-time';
 import { UserAvatar } from '@/components/user-avatar';
+import { useUserRoles } from '@/features/server/hooks';
 import { usePluginMetadata } from '@/features/server/plugins/hooks';
 import { useIsOwnUser, useUserById } from '@/features/server/users/hooks';
 import { cn } from '@/lib/utils';
@@ -47,6 +48,13 @@ const MessagesGroup = memo(
     const authorName = useMessageAuthorName(firstMessage);
     const isDeletedUser = user?.name === DELETED_USER_IDENTITY_AND_NAME;
     const isPluginMessage = !!firstMessage.pluginId;
+    const displayedRole = useUserRoles(firstMessage.userId!)
+      .sort((a, b) => a.orderNr - b.orderNr)
+      .find((r) => r.isGrouping === true);
+    let roleColor = '#ffffff';
+    if (displayedRole) {
+      roleColor = displayedRole.color;
+    }
 
     const isReplyToMessage =
       group.length === 1 && !!firstMessage.replyToMessageId;
@@ -71,7 +79,7 @@ const MessagesGroup = memo(
                 isPluginMessage && 'text-primary/80'
               )}
             >
-              {authorName}
+              <span style={{ color: roleColor }}>{authorName}</span>
             </span>
             {isPluginMessage && (
               <span className="inline-flex items-center rounded-sm bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary/60 uppercase tracking-wide">
